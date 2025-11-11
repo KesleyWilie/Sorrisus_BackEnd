@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -61,6 +62,7 @@ class UsuarioServiceTest {
 
         assertThat(usuarios).hasSize(1);
         assertThat(usuarios.get(0).getEmail()).isEqualTo("maria@sorrisus.com");
+        verify(usuarioRepository, times(1)).findAll();
     }
 
     @Test
@@ -72,6 +74,55 @@ class UsuarioServiceTest {
 
         assertThat(resultado).isPresent();
         assertThat(resultado.get().getId()).isEqualTo(1L);
+        verify(usuarioRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    @DisplayName("Deve retornar Optional vazio ao buscar usuário inexistente")
+    void deveRetornarOptionalVazioAoBuscarInexistente() {
+        when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
+
+        Optional<Usuario> resultado = usuarioService.buscarPorId(99L);
+
+        assertThat(resultado).isEmpty();
+        verify(usuarioRepository, times(1)).findById(99L);
+    }
+
+    @Test
+    @DisplayName("Deve atualizar usuário com sucesso")
+    void deveAtualizarUsuarioComSucesso() {
+        Usuario atualizado = new Usuario();
+        atualizado.setNome("Maria Atualizada");
+        atualizado.setEmail("maria.atualizada@sorrisus.com");
+        atualizado.setSenha("654321");
+        atualizado.setRole(Role.ROLE_RECEPCIONISTA);
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioBase));
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Usuario resultado = usuarioService.atualizar(1L, atualizado);
+
+        assertThat(resultado.getNome()).isEqualTo("Maria Atualizada");
+        assertThat(resultado.getEmail()).isEqualTo("maria.atualizada@sorrisus.com");
+        assertThat(resultado.getSenha()).isEqualTo("654321");
+        verify(usuarioRepository, times(1)).findById(1L);
+        verify(usuarioRepository, times(1)).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar atualizar usuário inexistente")
+    void deveLancarExcecaoAoAtualizarInexistente() {
+        Usuario atualizado = new Usuario();
+        atualizado.setNome("Nome Qualquer");
+
+        when(usuarioRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> usuarioService.atualizar(2L, atualizado))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Usuário não encontrado");
+
+        verify(usuarioRepository, times(1)).findById(2L);
+        verify(usuarioRepository, never()).save(any(Usuario.class));
     }
 
     @Test
