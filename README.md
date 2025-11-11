@@ -61,6 +61,70 @@ export DB_PASS=sua_senha
 
 Ou configure diretamente em `src/main/resources/application.properties`.
 
+## Como subir via Docker
+
+Siga estes passos para executar a aplicação e o banco de dados com Docker Compose sem expor credenciais no repositório.
+
+#### 1. Criar arquivo .env (variáveis sensíveis)
+Na raiz do projeto crie um arquivo chamado `.env` e defina as variáveis abaixo:
+
+```
+# .env 
+MYSQL_ROOT_PASSWORD=seu_mysql_root_password
+DB_USER=seu_usuario_app
+DB_PASS=sua_senha_app
+DB_URL=jdbc:mysql://db_sorrisus:3306/sorrisus_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+```
+
+Variáveis necessárias:
+- MYSQL_ROOT_PASSWORD
+- DB_USER
+- DB_PASS
+- DB_URL (opcional se sua aplicação obtém a URL de outra fonte, mas recomendado)
+
+
+#### 2. Subir os containers 
+Com a Engine do Docker rodando. Abra o terminal na raiz do projeto e execute:
+
+```
+docker compose up --build
+```
+
+Para rodar em background:
+
+```
+docker compose up -d --build
+```
+
+#### 3. Verificar status e logs
+Verifique containers em execução:
+
+```
+docker compose ps
+```
+
+Acompanhe logs (aplicação ou banco):
+
+```
+docker compose logs -f sorrisus_app
+docker compose logs -f db_sorrisus
+```
+
+#### 4. Parar e remover containers
+Parar sem remover:
+
+```
+docker compose stop
+```
+
+Parar e remover volumes/containers:
+
+```
+docker compose down -v
+```
+
+#### 5. Observações importantes
+- Use o host `db_sorrisus` na URL JDBC (nome do serviço definido no docker-compose).      
 
 ## Estrutura do projeto
 
