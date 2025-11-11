@@ -145,6 +145,13 @@ Cada entidade possui operações para:
 * Atualizar (`PUT /{id}`)
 * Deletar (`DELETE /{id}`)
 
+### Testes unitários
+O projeto inclui testes unitários do serviços e é possível executá-los com o comando:
+
+```
+mvn test
+```
+
 ## Próximos passos
 
 * Implementar autenticação e controle de acesso (Spring Security)
