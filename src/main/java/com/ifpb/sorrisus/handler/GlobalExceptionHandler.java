@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -71,4 +72,10 @@ public class GlobalExceptionHandler {
                 .body(buildResponse(HttpStatus.INTERNAL_SERVER_ERROR,
                         "Erro interno no servidor.", request.getRequestURI()));
     }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<?> handleBadCredentials(BadCredentialsException ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(buildResponse(HttpStatus.UNAUTHORIZED, "Credenciais inválidas.", request.getRequestURI()));
+}
 }
