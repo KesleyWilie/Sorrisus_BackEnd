@@ -1,5 +1,9 @@
 package com.ifpb.sorrisus.service;
 
+import com.ifpb.sorrisus.exception.CPFAlreadyExistsException;
+import com.ifpb.sorrisus.exception.InvalidCPFException;
+import com.ifpb.sorrisus.exception.InvalidFieldException;
+import com.ifpb.sorrisus.exception.ResourceNotFoundException;
 import com.ifpb.sorrisus.model.Paciente;
 import com.ifpb.sorrisus.repository.PacienteRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,13 +49,90 @@ class PacienteServiceTest {
     @Test
     @DisplayName("Deve salvar paciente com sucesso")
     void deveSalvarPaciente() {
+        when(pacienteRepository.existsByCpf("12345678900")).thenReturn(false);
         when(pacienteRepository.save(any(Paciente.class))).thenReturn(paciente);
 
         Paciente salvo = pacienteService.salvar(paciente);
 
         assertThat(salvo).isNotNull();
         assertThat(salvo.getNome()).isEqualTo("João Silva");
+        assertThat(salvo.getCpf()).isEqualTo("12345678900");
         verify(pacienteRepository, times(1)).save(paciente);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao salvar paciente com CPF nulo")
+    void deveLancarExcecaoAoSalvarComCpfNulo() {
+        paciente.setCpf(null);
+
+        assertThatThrownBy(() -> pacienteService.salvar(paciente))
+                .isInstanceOf(InvalidFieldException.class)
+                .hasMessageContaining("O CPF é obrigatório");
+
+        verify(pacienteRepository, never()).save(any(Paciente.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao salvar paciente com CPF inválido")
+    void deveLancarExcecaoAoSalvarComCpfInvalido() {
+        paciente.setCpf("123");
+
+        assertThatThrownBy(() -> pacienteService.salvar(paciente))
+                .isInstanceOf(InvalidCPFException.class)
+                .hasMessageContaining("123");
+
+        verify(pacienteRepository, never()).save(any(Paciente.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao salvar paciente com CPF já existente")
+    void deveLancarExcecaoAoSalvarComCpfJaExistente() {
+        when(pacienteRepository.existsByCpf("12345678900")).thenReturn(true);
+
+        assertThatThrownBy(() -> pacienteService.salvar(paciente))
+                .isInstanceOf(CPFAlreadyExistsException.class)
+                .hasMessageContaining("12345678900");
+
+        verify(pacienteRepository, never()).save(any(Paciente.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao salvar paciente com data de nascimento futura")
+    void deveLancarExcecaoAoSalvarComDataFutura() {
+        paciente.setDataNascimento(LocalDate.now().plusDays(1));
+        when(pacienteRepository.existsByCpf("12345678900")).thenReturn(false);
+
+        assertThatThrownBy(() -> pacienteService.salvar(paciente))
+                .isInstanceOf(InvalidFieldException.class)
+                .hasMessageContaining("A data de nascimento não pode ser futura");
+
+        verify(pacienteRepository, never()).save(any(Paciente.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao salvar paciente com telefone nulo")
+    void deveLancarExcecaoAoSalvarComTelefoneNulo() {
+        paciente.setTelefone(null);
+        when(pacienteRepository.existsByCpf("12345678900")).thenReturn(false);
+
+        assertThatThrownBy(() -> pacienteService.salvar(paciente))
+                .isInstanceOf(InvalidFieldException.class)
+                .hasMessageContaining("O telefone é obrigatório");
+
+        verify(pacienteRepository, never()).save(any(Paciente.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao salvar paciente com telefone em branco")
+    void deveLancarExcecaoAoSalvarComTelefoneEmBranco() {
+        paciente.setTelefone("   ");
+        when(pacienteRepository.existsByCpf("12345678900")).thenReturn(false);
+
+        assertThatThrownBy(() -> pacienteService.salvar(paciente))
+                .isInstanceOf(InvalidFieldException.class)
+                .hasMessageContaining("O telefone é obrigatório");
+
+        verify(pacienteRepository, never()).save(any(Paciente.class));
     }
 
     @Test
@@ -63,6 +144,7 @@ class PacienteServiceTest {
 
         assertThat(lista).hasSize(1);
         assertThat(lista.get(0).getEmail()).isEqualTo("joao@sorrisus.com");
+        verify(pacienteRepository, times(1)).findAll();
     }
 
     @Test
@@ -70,21 +152,23 @@ class PacienteServiceTest {
     void deveBuscarPacientePorId() {
         when(pacienteRepository.findById(1L)).thenReturn(Optional.of(paciente));
 
-        Optional<Paciente> resultado = pacienteService.buscarPorId(1L);
+        Paciente resultado = pacienteService.buscarPorId(1L);
 
-        assertThat(resultado).isPresent();
-        assertThat(resultado.get().getCpf()).isEqualTo("12345678900");
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getCpf()).isEqualTo("12345678900");
+        assertThat(resultado.getTelefone()).isEqualTo("83999999999");
         verify(pacienteRepository, times(1)).findById(1L);
     }
 
     @Test
-    @DisplayName("Deve retornar Optional vazio ao buscar paciente inexistente")
-    void deveRetornarOptionalVazioAoBuscarInexistente() {
+    @DisplayName("Deve lançar exceção ao buscar paciente inexistente")
+    void deveLancarExcecaoAoBuscarInexistente() {
         when(pacienteRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Optional<Paciente> resultado = pacienteService.buscarPorId(99L);
+        assertThatThrownBy(() -> pacienteService.buscarPorId(99L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Paciente com id 99 não encontrado");
 
-        assertThat(resultado).isEmpty();
         verify(pacienteRepository, times(1)).findById(99L);
     }
 
@@ -99,6 +183,7 @@ class PacienteServiceTest {
         atualizado.setDataNascimento(LocalDate.parse("1991-02-02"));
 
         when(pacienteRepository.findById(1L)).thenReturn(Optional.of(paciente));
+        when(pacienteRepository.existsByCpf("99988877766")).thenReturn(false);
         when(pacienteRepository.save(any(Paciente.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Paciente resultado = pacienteService.atualizar(1L, atualizado);
@@ -112,16 +197,72 @@ class PacienteServiceTest {
     }
 
     @Test
+    @DisplayName("Deve manter mesmo CPF ao atualizar paciente")
+    void deveManterMesmoCpfAoAtualizar() {
+        Paciente atualizado = new Paciente();
+        atualizado.setNome("João Atualizado");
+        atualizado.setCpf("12345678900");
+        atualizado.setTelefone("83888888888");
+
+        when(pacienteRepository.findById(1L)).thenReturn(Optional.of(paciente));
+        when(pacienteRepository.save(any(Paciente.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Paciente resultado = pacienteService.atualizar(1L, atualizado);
+
+        assertThat(resultado.getCpf()).isEqualTo("12345678900");
+        verify(pacienteRepository, times(1)).findById(1L);
+        verify(pacienteRepository, times(1)).save(any(Paciente.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao atualizar paciente com CPF já existente")
+    void deveLancarExcecaoAoAtualizarComCpfJaExistente() {
+        Paciente atualizado = new Paciente();
+        atualizado.setNome("João Atualizado");
+        atualizado.setCpf("99988877766");
+        atualizado.setTelefone("83888888888");
+
+        when(pacienteRepository.findById(1L)).thenReturn(Optional.of(paciente));
+        when(pacienteRepository.existsByCpf("99988877766")).thenReturn(true);
+
+        assertThatThrownBy(() -> pacienteService.atualizar(1L, atualizado))
+                .isInstanceOf(CPFAlreadyExistsException.class)
+                .hasMessageContaining("99988877766");
+
+        verify(pacienteRepository, never()).save(any(Paciente.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao atualizar paciente com CPF inválido")
+    void deveLancarExcecaoAoAtualizarComCpfInvalido() {
+        Paciente atualizado = new Paciente();
+        atualizado.setNome("João Atualizado");
+        atualizado.setCpf("123");
+        atualizado.setTelefone("83888888888");
+
+        when(pacienteRepository.findById(1L)).thenReturn(Optional.of(paciente));
+        when(pacienteRepository.existsByCpf("123")).thenReturn(false);
+
+        assertThatThrownBy(() -> pacienteService.atualizar(1L, atualizado))
+                .isInstanceOf(InvalidCPFException.class)
+                .hasMessageContaining("123");
+
+        verify(pacienteRepository, never()).save(any(Paciente.class));
+    }
+
+    @Test
     @DisplayName("Deve lançar exceção ao tentar atualizar paciente inexistente")
     void deveLancarExcecaoAoAtualizarInexistente() {
         Paciente atualizado = new Paciente();
         atualizado.setNome("Nome Qualquer");
+        atualizado.setCpf("12345678900");
+        atualizado.setTelefone("83999999999");
 
         when(pacienteRepository.findById(2L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> pacienteService.atualizar(2L, atualizado))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Paciente não encontrado");
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Paciente com id 2 não encontrado");
 
         verify(pacienteRepository, times(1)).findById(2L);
         verify(pacienteRepository, never()).save(any(Paciente.class));
@@ -130,8 +271,24 @@ class PacienteServiceTest {
     @Test
     @DisplayName("Deve deletar paciente com sucesso")
     void deveDeletarPaciente() {
-        doNothing().when(pacienteRepository).deleteById(1L);
+        when(pacienteRepository.findById(1L)).thenReturn(Optional.of(paciente));
+        doNothing().when(pacienteRepository).delete(paciente);
+
         pacienteService.deletar(1L);
-        verify(pacienteRepository, times(1)).deleteById(1L);
+
+        verify(pacienteRepository, times(1)).findById(1L);
+        verify(pacienteRepository, times(1)).delete(paciente);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar deletar paciente inexistente")
+    void deveLancarExcecaoAoDeletarInexistente() {
+        when(pacienteRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> pacienteService.deletar(99L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Paciente com id 99 não encontrado");
+
+        verify(pacienteRepository, never()).delete(any(Paciente.class));
     }
 }

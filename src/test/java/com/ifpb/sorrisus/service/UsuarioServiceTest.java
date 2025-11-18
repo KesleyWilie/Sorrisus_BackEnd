@@ -1,5 +1,8 @@
 package com.ifpb.sorrisus.service;
 
+import com.ifpb.sorrisus.exception.EmailAlreadyExistsException;
+import com.ifpb.sorrisus.exception.InvalidFieldException;
+import com.ifpb.sorrisus.exception.ResourceNotFoundException;
 import com.ifpb.sorrisus.model.Role;
 import com.ifpb.sorrisus.model.Usuario;
 import com.ifpb.sorrisus.repository.UsuarioRepository;
@@ -44,13 +47,65 @@ class UsuarioServiceTest {
     @Test
     @DisplayName("Deve salvar um usuário com sucesso")
     void deveSalvarUsuario() {
+        when(usuarioRepository.existsByEmail("maria@sorrisus.com")).thenReturn(false);
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuarioBase);
 
         Usuario salvo = usuarioService.salvar(usuarioBase);
 
         assertThat(salvo).isNotNull();
         assertThat(salvo.getNome()).isEqualTo("Maria Souza");
+        assertThat(salvo.getEmail()).isEqualTo("maria@sorrisus.com");
+        assertThat(salvo.getRole()).isEqualTo(Role.ROLE_RECEPCIONISTA);
         verify(usuarioRepository, times(1)).save(usuarioBase);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao salvar usuário com email nulo")
+    void deveLancarExcecaoAoSalvarComEmailNulo() {
+        usuarioBase.setEmail(null);
+
+        assertThatThrownBy(() -> usuarioService.salvar(usuarioBase))
+                .isInstanceOf(InvalidFieldException.class)
+                .hasMessageContaining("O e-mail é obrigatório");
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao salvar usuário com email em branco")
+    void deveLancarExcecaoAoSalvarComEmailEmBranco() {
+        usuarioBase.setEmail("   ");
+
+        assertThatThrownBy(() -> usuarioService.salvar(usuarioBase))
+                .isInstanceOf(InvalidFieldException.class)
+                .hasMessageContaining("O e-mail é obrigatório");
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao salvar usuário com email já existente")
+    void deveLancarExcecaoAoSalvarComEmailJaExistente() {
+        when(usuarioRepository.existsByEmail("maria@sorrisus.com")).thenReturn(true);
+
+        assertThatThrownBy(() -> usuarioService.salvar(usuarioBase))
+                .isInstanceOf(EmailAlreadyExistsException.class)
+                .hasMessageContaining("maria@sorrisus.com");
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao salvar usuário com role nula")
+    void deveLancarExcecaoAoSalvarComRoleNula() {
+        usuarioBase.setRole(null);
+        when(usuarioRepository.existsByEmail("maria@sorrisus.com")).thenReturn(false);
+
+        assertThatThrownBy(() -> usuarioService.salvar(usuarioBase))
+                .isInstanceOf(InvalidFieldException.class)
+                .hasMessageContaining("A role é obrigatória");
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
     }
 
     @Test
@@ -66,25 +121,27 @@ class UsuarioServiceTest {
     }
 
     @Test
-    @DisplayName("Deve buscar usuário por ID e validar dados")
-    void deveBuscarPorIdValidarDados() {
+    @DisplayName("Deve buscar usuário por ID com sucesso")
+    void deveBuscarPorIdComSucesso() {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioBase));
 
-        Optional<Usuario> resultado = usuarioService.buscarPorId(1L);
+        Usuario resultado = usuarioService.buscarPorId(1L);
 
-        assertThat(resultado).isPresent();
-        assertThat(resultado.get().getId()).isEqualTo(1L);
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getId()).isEqualTo(1L);
+        assertThat(resultado.getNome()).isEqualTo("Maria Souza");
         verify(usuarioRepository, times(1)).findById(1L);
     }
 
     @Test
-    @DisplayName("Deve retornar Optional vazio ao buscar usuário inexistente")
-    void deveRetornarOptionalVazioAoBuscarInexistente() {
+    @DisplayName("Deve lançar exceção ao buscar usuário inexistente")
+    void deveLancarExcecaoAoBuscarUsuarioInexistente() {
         when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Optional<Usuario> resultado = usuarioService.buscarPorId(99L);
+        assertThatThrownBy(() -> usuarioService.buscarPorId(99L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Usuário com id 99 não encontrado");
 
-        assertThat(resultado).isEmpty();
         verify(usuarioRepository, times(1)).findById(99L);
     }
 
@@ -98,6 +155,7 @@ class UsuarioServiceTest {
         atualizado.setRole(Role.ROLE_RECEPCIONISTA);
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioBase));
+        when(usuarioRepository.existsByEmail("maria.atualizada@sorrisus.com")).thenReturn(false);
         when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Usuario resultado = usuarioService.atualizar(1L, atualizado);
@@ -110,6 +168,44 @@ class UsuarioServiceTest {
     }
 
     @Test
+    @DisplayName("Deve manter mesmo email ao atualizar usuário")
+    void deveManterMesmoEmailAoAtualizar() {
+        Usuario atualizado = new Usuario();
+        atualizado.setNome("Maria Souza");
+        atualizado.setEmail("maria@sorrisus.com");
+        atualizado.setSenha("654321");
+        atualizado.setRole(Role.ROLE_RECEPCIONISTA);
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioBase));
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Usuario resultado = usuarioService.atualizar(1L, atualizado);
+
+        assertThat(resultado.getEmail()).isEqualTo("maria@sorrisus.com");
+        verify(usuarioRepository, times(1)).findById(1L);
+        verify(usuarioRepository, times(1)).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao atualizar com email já existente")
+    void deveLancarExcecaoAoAtualizarComEmailJaExistente() {
+        Usuario atualizado = new Usuario();
+        atualizado.setNome("Maria Atualizada");
+        atualizado.setEmail("outro@sorrisus.com");
+        atualizado.setSenha("654321");
+        atualizado.setRole(Role.ROLE_RECEPCIONISTA);
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioBase));
+        when(usuarioRepository.existsByEmail("outro@sorrisus.com")).thenReturn(true);
+
+        assertThatThrownBy(() -> usuarioService.atualizar(1L, atualizado))
+                .isInstanceOf(EmailAlreadyExistsException.class)
+                .hasMessageContaining("outro@sorrisus.com");
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
     @DisplayName("Deve lançar exceção ao tentar atualizar usuário inexistente")
     void deveLancarExcecaoAoAtualizarInexistente() {
         Usuario atualizado = new Usuario();
@@ -118,20 +214,33 @@ class UsuarioServiceTest {
         when(usuarioRepository.findById(2L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> usuarioService.atualizar(2L, atualizado))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Usuário não encontrado");
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Usuário com id 2 não encontrado");
 
-        verify(usuarioRepository, times(1)).findById(2L);
         verify(usuarioRepository, never()).save(any(Usuario.class));
     }
 
     @Test
     @DisplayName("Deve deletar usuário com sucesso")
     void deveDeletarUsuario() {
-        doNothing().when(usuarioRepository).deleteById(1L);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioBase));
+        doNothing().when(usuarioRepository).delete(usuarioBase);
 
         usuarioService.deletar(1L);
 
-        verify(usuarioRepository, times(1)).deleteById(1L);
+        verify(usuarioRepository, times(1)).findById(1L);
+        verify(usuarioRepository, times(1)).delete(usuarioBase);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao tentar deletar usuário inexistente")
+    void deveLancarExcecaoAoDeletarInexistente() {
+        when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> usuarioService.deletar(99L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Usuário com id 99 não encontrado");
+
+        verify(usuarioRepository, never()).delete(any(Usuario.class));
     }
 }
