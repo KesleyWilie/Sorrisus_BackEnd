@@ -1,49 +1,84 @@
 package com.ifpb.sorrisus.service;
 
+import com.ifpb.sorrisus.exception.*;
 import com.ifpb.sorrisus.model.Paciente;
 import com.ifpb.sorrisus.repository.PacienteRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PacienteService {
 
-    private final PacienteRepository repository;
+    private final PacienteRepository pacienteRepository;
 
-    public PacienteService(PacienteRepository repository) {
-        this.repository = repository;
+    public PacienteService(PacienteRepository pacienteRepository) {
+        this.pacienteRepository = pacienteRepository;
     }
 
-    public List<Paciente> listarTodos() {
-        return repository.findAll();
-    }
-
-    public Optional<Paciente> buscarPorId(Long id) {
-        return repository.findById(id);
+    private boolean cpfValido(String cpf) {
+        return cpf != null && cpf.matches("\\d{11}");
     }
 
     public Paciente salvar(Paciente paciente) {
-        return repository.save(paciente);
+
+        if (paciente.getCpf() == null) {
+            throw new InvalidFieldException("cpf", "O CPF é obrigatório.");
+        }
+
+        if (!cpfValido(paciente.getCpf())) {
+            throw new InvalidCPFException(paciente.getCpf());
+        }
+
+        if (pacienteRepository.existsByCpf(paciente.getCpf())) {
+            throw new CPFAlreadyExistsException(paciente.getCpf());
+        }
+
+        if (paciente.getDataNascimento() != null &&
+                paciente.getDataNascimento().isAfter(LocalDate.now())) {
+            throw new InvalidFieldException("dataNascimento", "A data de nascimento não pode ser futura.");
+        }
+
+        if (paciente.getTelefone() == null || paciente.getTelefone().isBlank()) {
+            throw new InvalidFieldException("telefone", "O telefone é obrigatório.");
+        }
+
+        return pacienteRepository.save(paciente);
     }
 
-    public Paciente atualizar(Long id, Paciente pacienteAtualizado) {
-        return repository.findById(id)
-                .map(paciente -> {
-                    paciente.setNome(pacienteAtualizado.getNome());
-                    paciente.setEmail(pacienteAtualizado.getEmail());
-                    paciente.setSenha(pacienteAtualizado.getSenha());
-                    paciente.setRole(pacienteAtualizado.getRole());
-                    paciente.setCpf(pacienteAtualizado.getCpf());
-                    paciente.setTelefone(pacienteAtualizado.getTelefone());
-                    paciente.setDataNascimento(pacienteAtualizado.getDataNascimento());
-                    return repository.save(paciente);
-                })
-                .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
+    public Paciente buscarPorId(Long id) {
+        return pacienteRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Paciente com id " + id + " não encontrado.")
+        );
+    }
+
+    public List<Paciente> listarTodos() {
+        return pacienteRepository.findAll();
+    }
+
+    public Paciente atualizar(Long id, Paciente atualizado) {
+        Paciente existente = buscarPorId(id);
+
+        if (!existente.getCpf().equals(atualizado.getCpf())
+                && pacienteRepository.existsByCpf(atualizado.getCpf())) {
+            throw new CPFAlreadyExistsException(atualizado.getCpf());
+        }
+
+        if (!cpfValido(atualizado.getCpf())) {
+            throw new InvalidCPFException(atualizado.getCpf());
+        }
+
+        existente.setNome(atualizado.getNome());
+        existente.setCpf(atualizado.getCpf());
+        existente.setTelefone(atualizado.getTelefone());
+        existente.setDataNascimento(atualizado.getDataNascimento());
+
+        return pacienteRepository.save(existente);
     }
 
     public void deletar(Long id) {
-        repository.deleteById(id);
+        Paciente paciente = buscarPorId(id);
+        pacienteRepository.delete(paciente);
     }
 }

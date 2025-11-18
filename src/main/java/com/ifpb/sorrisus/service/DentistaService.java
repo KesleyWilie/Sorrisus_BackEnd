@@ -1,48 +1,77 @@
 package com.ifpb.sorrisus.service;
 
+import com.ifpb.sorrisus.exception.*;
 import com.ifpb.sorrisus.model.Dentista;
 import com.ifpb.sorrisus.repository.DentistaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DentistaService {
 
-    private final DentistaRepository repository;
+    private final DentistaRepository dentistaRepository;
 
-    public DentistaService(DentistaRepository repository) {
-        this.repository = repository;
+    public DentistaService(DentistaRepository dentistaRepository) {
+        this.dentistaRepository = dentistaRepository;
     }
 
-    public List<Dentista> listarTodos() {
-        return repository.findAll();
-    }
-
-    public Optional<Dentista> buscarPorId(Long id) {
-        return repository.findById(id);
+    private boolean croValido(String cro) {
+        return cro != null && cro.matches("\\d{4,6}-[A-Z]{2}");
     }
 
     public Dentista salvar(Dentista dentista) {
-        return repository.save(dentista);
+
+        if (dentista.getCro() == null) {
+            throw new InvalidFieldException("cro", "O CRO é obrigatório.");
+        }
+
+        if (!croValido(dentista.getCro())) {
+            throw new InvalidCROException("Formato inválido de CRO. Exemplo válido: 12345-PB");
+        }
+
+        if (dentistaRepository.existsByCro(dentista.getCro())) {
+            throw new BusinessException("O CRO '" + dentista.getCro() + "' já está cadastrado.");
+        }
+
+        if (dentista.getEspecialidade() == null || dentista.getEspecialidade().isBlank()) {
+            throw new InvalidFieldException("especialidade", "A especialidade é obrigatória.");
+        }
+
+        return dentistaRepository.save(dentista);
     }
 
-    public Dentista atualizar(Long id, Dentista dentistaAtualizado) {
-        return repository.findById(id)
-                .map(dentista -> {
-                    dentista.setNome(dentistaAtualizado.getNome());
-                    dentista.setEmail(dentistaAtualizado.getEmail());
-                    dentista.setSenha(dentistaAtualizado.getSenha());
-                    dentista.setRole(dentistaAtualizado.getRole());
-                    dentista.setCro(dentistaAtualizado.getCro());
-                    dentista.setEspecialidade(dentistaAtualizado.getEspecialidade());
-                    return repository.save(dentista);
-                })
-                .orElseThrow(() -> new RuntimeException("Dentista não encontrado"));
+    public Dentista buscarPorId(Long id) {
+        return dentistaRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Dentista com id " + id + " não encontrado.")
+        );
+    }
+
+    public List<Dentista> listarTodos() {
+        return dentistaRepository.findAll();
+    }
+
+    public Dentista atualizar(Long id, Dentista atualizado) {
+        Dentista existente = buscarPorId(id);
+
+        if (!existente.getCro().equals(atualizado.getCro()) &&
+                dentistaRepository.existsByCro(atualizado.getCro())) {
+            throw new BusinessException("O CRO '" + atualizado.getCro() + "' já está cadastrado.");
+        }
+
+        if (!croValido(atualizado.getCro())) {
+            throw new InvalidCROException("Formato inválido de CRO. Exemplo válido: 12345-PB");
+        }
+
+        existente.setNome(atualizado.getNome());
+        existente.setEspecialidade(atualizado.getEspecialidade());
+        existente.setCro(atualizado.getCro());
+
+        return dentistaRepository.save(existente);
     }
 
     public void deletar(Long id) {
-        repository.deleteById(id);
+        Dentista dentista = buscarPorId(id);
+        dentistaRepository.delete(dentista);
     }
 }

@@ -24,9 +24,8 @@ public class RecepcionistaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Recepcionista> buscarPorId(@PathVariable Long id) {
-        return service.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Recepcionista recepcionista = service.buscarPorId(id);
+        return ResponseEntity.ok(recepcionista);
     }
 
     @PostMapping

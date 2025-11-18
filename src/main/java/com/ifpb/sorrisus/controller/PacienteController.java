@@ -24,9 +24,8 @@ public class PacienteController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Paciente> buscarPorId(@PathVariable Long id) {
-        return service.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Paciente paciente = service.buscarPorId(id);
+        return ResponseEntity.ok(paciente);
     }
 
     @PostMapping
