@@ -6,26 +6,95 @@ O **Sorrisus** é um sistema odontológico desenvolvido como parte de um projeto
 
 O sistema está sendo desenvolvido em **Java com Spring Boot**, utilizando **MySQL** como banco de dados relacional, e segue uma **arquitetura em camadas** (Controller → Service → Repository → Model).
 
+Com a evolução do projeto, o backend agora possui **autenticação completa com JWT**, **rotas protegidas**, **controle de acesso por papéis (roles)** e **middleware de segurança** usando Spring Security.
+
+
+## 🛡️ Autenticação JWT (nova funcionalidade)
+
+O sistema agora implementa um fluxo completo de autenticação baseado em JWT (**JSON Web Token**).
+
+### Como funciona?
+
+1. O usuário faz login enviando **email + senha** para `/api/auth/login`.
+2. O backend valida as credenciais.
+3. Se válidas, gera um **token JWT**, assinado com chave secreta.
+4. O token precisa ser enviado em todas as requisições protegidas no header:
+
+```
+
+Authorization: Bearer <token>
+
+```
+
+### Rotas públicas (sem autenticação)
+
+- `POST /api/auth/login`
+- `POST /api/usuarios/cadastro`
+- `POST /api/dentistas/cadastro`
+- `POST /api/pacientes/cadastro`
+- `POST /api/recepcionistas/cadastro`
+
+Todas as demais rotas agora **exigem autenticação**.
+
+### Middleware de segurança
+
+- Filtro JWT (`JwtAuthenticationFilter`) validando tokens a cada request.
+- Classe de usuários customizada (`CustomUserDetailsService`).
+- Configuração de segurança centralizada (`SecurityConfig`).
+- Controle de sessão 100% stateless.
+
+## 🌐 CORS configurado para comunicação com o front-end
+
+O CORS foi configurado globalmente para permitir que o front-end (porta 5173, Vite + React) possa consumir a API:
+
+Origem permitida:
+```
+
+http://localhost:5173
+
+```
+
+Métodos liberados:
+```
+
+GET, POST, PUT, DELETE, OPTIONS
+
+```
+
+Headers permitidos:
+```
+
+Authorization, Content-Type
+
+````
+
+Credenciais habilitadas (para envio de token).
+
 ## Funcionalidades atuais
 
 Atualmente, o backend do sistema conta com:
 
 * **Entidades modeladas:**
-
   * `Usuario`
   * `Paciente`
   * `Dentista`
   * `Recepcionista`
   * `Role` (enum de papéis de usuário)
-* **CRUD completo (Create, Read, Update, Delete)** implementado para todas as entidades principais.
-* **Banco de dados MySQL configurado** com criação automática das tabelas via JPA/Hibernate.
-* **Variáveis de ambiente** utilizadas para armazenar URL, usuário e senha do banco de dados.
-* **Projeto configurado com Lombok** (para reduzir boilerplate) e **Spring DevTools** (para recarregamento automático durante o desenvolvimento).
+
+* **CRUD completo** (Create, Read, Update, Delete) para todas as entidades.
+* **Autenticação JWT** com filtro, validação e roles.
+* **Rotas protegidas por segurança** via Spring Security.
+* **Tratamento global de exceções**.
+* **Banco MySQL configurado** com criação automática via JPA/Hibernate.
+* **Uso de variáveis de ambiente** para dados sensíveis.
+* **Projeto configurado com Lombok** e **Spring DevTools**.
 
 ## Tecnologias utilizadas
 
 * Java 17
 * Spring Boot 3.5.6
+* Spring Security
+* JWT (jjwt-api / jjwt-impl / jjwt-jackson)
 * Spring Data JPA
 * MySQL
 * Lombok
@@ -35,133 +104,147 @@ Atualmente, o backend do sistema conta com:
 
 ### 1. Criar banco de dados MySQL
 
-Antes de iniciar o projeto, crie um banco de dados com o nome `sorrisus_db`:
-
 ```sql
 CREATE DATABASE sorrisus_db;
-```
+````
+
+---
 
 ### 2. Configurar variáveis de ambiente
 
-O sistema usa variáveis de ambiente para dados sensíveis:
+Agora o sistema utiliza **4 variáveis principais**:
 
-**Windows (CMD):**
+```
+DB_URL=
+DB_USER=
+DB_PASS=
+JWT_SECRET=
+JWT_EXPIRATION_MS=
+```
+
+### Exemplos
+
+#### **Windows (CMD)**
+
 ```cmd
 set DB_URL=jdbc:mysql://localhost:3306/sorrisus_db?useSSL=false&serverTimezone=UTC
 set DB_USER=seu_usuario
 set DB_PASS=sua_senha
+set JWT_SECRET=sua_chave_secreta_muito_segura
+set JWT_EXPIRATION_MS=3600000
 ```
 
-**Linux/Mac (bash):**
+#### **Linux/Mac (bash)**
+
 ```bash
-export DB_URL=jdbc:postgresql://localhost:5432/divulgafacil
+export DB_URL=jdbc:mysql://localhost:3306/sorrisus_db?useSSL=false&serverTimezone=UTC
 export DB_USER=seu_usuario
 export DB_PASS=sua_senha
+export JWT_SECRET=sua_chave_secreta_muito_segura
+export JWT_EXPIRATION_MS=3600000
 ```
-
-Ou configure diretamente em `src/main/resources/application.properties`.
 
 ## Como subir via Docker
 
-Siga estes passos para executar a aplicação e o banco de dados com Docker Compose sem expor credenciais no repositório.
-
-#### 1. Criar arquivo .env (variáveis sensíveis)
-Na raiz do projeto crie um arquivo chamado `.env` e defina as variáveis abaixo:
+### 1. Criar arquivo `.env` na raiz
 
 ```
-# .env 
 MYSQL_ROOT_PASSWORD=seu_mysql_root_password
 DB_USER=seu_usuario_app
 DB_PASS=sua_senha_app
 DB_URL=jdbc:mysql://db_sorrisus:3306/sorrisus_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+
+JWT_SECRET=sua_chave_super_secreta
+JWT_EXPIRATION_MS=3600000
 ```
 
-Variáveis necessárias:
-- MYSQL_ROOT_PASSWORD
-- DB_USER
-- DB_PASS
-- DB_URL (opcional se sua aplicação obtém a URL de outra fonte, mas recomendado)
+---
 
-
-#### 2. Subir os containers 
-Com a Engine do Docker rodando. Abra o terminal na raiz do projeto e execute:
+### 2. Subir containers
 
 ```
 docker compose up --build
 ```
 
-Para rodar em background:
+Em background:
 
 ```
 docker compose up -d --build
 ```
 
-#### 3. Verificar status e logs
-Verifique containers em execução:
+---
+
+### 3. Verificar status
 
 ```
 docker compose ps
 ```
 
-Acompanhe logs (aplicação ou banco):
+Logs:
 
 ```
 docker compose logs -f sorrisus_app
 docker compose logs -f db_sorrisus
 ```
 
-#### 4. Parar e remover containers
-Parar sem remover:
+---
+
+### 4. Parar containers
 
 ```
 docker compose stop
 ```
 
-Parar e remover volumes/containers:
+Remover:
 
 ```
 docker compose down -v
 ```
 
-#### 5. Observações importantes
-- Use o host `db_sorrisus` na URL JDBC (nome do serviço definido no docker-compose).      
-
 ## Estrutura do projeto
 
-* `model/` → classes de domínio e entidades JPA
-* `repository/` → interfaces de persistência (Spring Data JPA)
-* `service/` → regras de negócio e comunicação entre controller e repository
-* `controller/` → endpoints REST expostos para o Postman ou frontend
-* `resources/application.yml` → configurações do banco de dados e variáveis de ambiente
+* `model/` → entidades JPA
+* `repository/` → persistência
+* `service/` → regras de negócio
+* `controller/` → endpoints REST
+* `security/` → autenticação e JWT
+* `config/` → configs globais (CORS, Security)
+* `resources/application.yml` → configurações
 
 ## Testes
 
-O sistema pode ser testado via **Postman**, utilizando os endpoints REST disponíveis para cada entidade. O json da collection se encontra em `collection\Sorrisus_API_Collection.json.json`. 
-Cada entidade possui operações para:
+O sistema pode ser testado via **Postman**, utilizando a collection disponível em:
+
+```
+collection/Sorrisus_API_Collection.json
+```
+
+Cada entidade possui operações:
 
 * Criar (`POST`)
 * Listar (`GET`)
-* Buscar por ID (`GET /{id}`)
-* Atualizar (`PUT /{id}`)
-* Deletar (`DELETE /{id}`)
+* Buscar por ID (`GET`)
+* Atualizar (`PUT`)
+* Deletar (`DELETE`)
 
-### Testes unitários
-O projeto inclui testes unitários do serviços e é possível executá-los com o comando:
+## Testes unitários
+
+Os testes podem ser executados com:
 
 ```
 mvn test
 ```
 
+Incluem testes de serviços e agora também testes de autenticação JWT.
+
 ## Próximos passos
 
-* Implementar autenticação e controle de acesso (Spring Security)
 * Criar relacionamento entre entidades (ex: Paciente ↔ Dentista)
-* Desenvolver o frontend 
-* Criar testes automatizados e documentação de API (Swagger)
-
----
+* Criar dashboard no front-end
+* Implementar auditoria de ações
 
 ## 👥 Contribuidores
+
 <table>
   <tr>
     <td align="center">
@@ -209,4 +292,4 @@ mvn test
 
 ---
 
-**Instituto Federal da Paraíba** - Disciplina de **Projeto II**.
+**Instituto Federal da Paraíba** — Disciplina de **Projeto II**.
