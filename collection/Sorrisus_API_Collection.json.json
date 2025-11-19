@@ -1,41 +1,14 @@
 {
   "info": {
-    "name": "Sorrisus API",
-    "_postman_id": "c2b5b987-44a9-4c02-9e03-d0c5c877a000",
-    "description": "Coleção para testar a API do Sistema Sorrisus com autenticação JWT.",
+    "name": "Sorrisus API - CRUDs",
+    "_postman_id": "a5a6c1b2-f93d-4f2e-b91b-1234567890ab",
+    "description": "Coleção completa para testar os CRUDs e Auth do sistema Sorrisus.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:8080"
-    },
-    {
-      "key": "jwt",
-      "value": ""
-    }
-  ],
   "item": [
     {
       "name": "Auth",
       "item": [
-        {
-          "name": "Registrar Usuário",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Admin Sorrisus\",\n  \"email\": \"admin@sorrisus.com\",\n  \"senha\": \"admin123\",\n  \"role\": \"ROLE_RECEPCIONISTA\"\n}"
-            },
-            "url": "{{baseUrl}}/api/auth/register"
-          }
-        },
         {
           "name": "Login (gerar token JWT)",
           "event": [
@@ -45,7 +18,7 @@
                 "exec": [
                   "var json = pm.response.json();",
                   "if(json.accessToken){",
-                  "   pm.collectionVariables.set(\"jwt\", json.accessToken);",
+                  "   pm.collectionVariables.set(\"token\", json.accessToken);",
                   "   console.log(\"Token atualizado com sucesso!\");",
                   "} else {",
                   "   console.log(\"Nenhum token encontrado na resposta.\");",
@@ -58,222 +31,248 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"admin@sorrisus.com\",\n  \"password\": \"admin123\"\n}"
             },
-            "url": "{{baseUrl}}/api/auth/login"
+            "url": "{{base_url}}/api/auth/login"
           }
         }
       ]
     },
+
     {
-      "name": "Usuários",
+      "name": "🧍 Usuário",
       "item": [
         {
-          "name": "Listar Usuários",
+          "name": "Listar usuários",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{jwt}}"
-              }
-            ],
-            "url": "{{baseUrl}}/api/usuarios"
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/usuarios"
           }
         },
         {
-          "name": "Buscar Usuário por ID",
+          "name": "Buscar usuário por ID",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{jwt}}"
-              }
-            ],
-            "url": "{{baseUrl}}/api/usuarios/1"
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/usuarios/1"
           }
         },
         {
-          "name": "Criar Usuário",
+          "name": "Criar usuário",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{jwt}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"João Silva\",\n  \"email\": \"joao@sorrisus.com\",\n  \"senha\": \"123456\",\n  \"role\": \"ROLE_DENTISTA\"\n}"
+              "raw": "{\n  \"nome\": \"João Pereira\",\n  \"email\": \"joao.pereira@sorrisus.com\",\n  \"senha\": \"12345678\",\n  \"role\": \"ROLE_RECEPCIONISTA\"\n}"
             },
-            "url": "{{baseUrl}}/api/usuarios"
+            "url": "{{base_url}}/api/usuarios/cadastro"
           }
         },
         {
-          "name": "Atualizar Usuário",
+          "name": "Atualizar usuário",
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{jwt}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"João Atualizado\",\n  \"email\": \"joao@sorrisus.com\",\n  \"senha\": \"123456\",\n  \"role\": \"ROLE_DENTISTA\"\n}"
+              "raw": "{\n  \"nome\": \"João Marcos Pereira\",\n  \"email\": \"joao.marcos@sorrisus.com\",\n  \"senha\": \"senhaNova123\",\n  \"role\": \"ROLE_RECEPCIONISTA\"\n}"
             },
-            "url": "{{baseUrl}}/api/usuarios/1"
+            "url": "{{base_url}}/api/usuarios/1"
           }
         },
         {
-          "name": "Deletar Usuário",
+          "name": "Deletar usuário",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{jwt}}"
-              }
-            ],
-            "url": "{{baseUrl}}/api/usuarios/1"
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/usuarios/1"
           }
         }
       ]
     },
+
     {
-      "name": "Pacientes",
+      "name": "🦷 Dentista",
       "item": [
         {
-          "name": "Listar Pacientes",
+          "name": "Listar dentistas",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{jwt}}"
-              }
-            ],
-            "url": "{{baseUrl}}/api/pacientes"
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/dentistas"
           }
         },
         {
-          "name": "Criar Paciente",
+          "name": "Buscar dentista por ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/dentistas/1"
+          }
+        },
+        {
+          "name": "Criar dentista",
           "request": {
             "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Dra. Ana Paula\",\n  \"email\": \"ana.paula@sorrisus.com\",\n  \"senha\": \"senhaSegura123\",\n  \"cro\": \"CRO98765\",\n  \"especialidade\": \"Ortodontia\",\n  \"role\": \"ROLE_DENTISTA\"\n}"
+            },
+            "url": "{{base_url}}/api/dentistas/cadastro"
+          }
+        },
+        {
+          "name": "Atualizar dentista",
+          "request": {
+            "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{jwt}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Maria Souza\",\n  \"email\": \"maria@sorrisus.com\",\n  \"senha\": \"123456\",\n  \"role\": \"ROLE_RECEPCIONISTA\",\n  \"cpf\": \"00011122233\",\n  \"telefone\": \"83999999999\",\n  \"dataNascimento\": \"1995-01-10\"\n}"
+              "raw": "{\n  \"nome\": \"Dra. Ana Paula Nunes\",\n  \"email\": \"ana.nunes@sorrisus.com\",\n  \"senha\": \"novaSenha123\",\n  \"cro\": \"CRO98765\",\n  \"especialidade\": \"Implantodontia\",\n  \"role\": \"ROLE_DENTISTA\"\n}"
             },
-            "url": "{{baseUrl}}/api/pacientes"
+            "url": "{{base_url}}/api/dentistas/1"
+          }
+        },
+        {
+          "name": "Deletar dentista",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/dentistas/1"
           }
         }
       ]
     },
+
     {
-      "name": "Dentistas",
+      "name": "🧾 Paciente",
       "item": [
         {
-          "name": "Listar Dentistas",
+          "name": "Listar pacientes",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{jwt}}"
-              }
-            ],
-            "url": "{{baseUrl}}/api/dentistas"
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/pacientes"
           }
         },
         {
-          "name": "Criar Dentista",
+          "name": "Buscar paciente por ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/pacientes/1"
+          }
+        },
+        {
+          "name": "Criar paciente",
           "request": {
             "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Carlos Souza\",\n  \"email\": \"carlos.souza@sorrisus.com\",\n  \"senha\": \"senhaSegura123\",\n  \"cpf\": \"12345678901\",\n  \"telefone\": \"83998887777\",\n  \"dataNascimento\": \"1990-05-10\",\n  \"role\": \"ROLE_PACIENTE\"\n}"
+            },
+            "url": "{{base_url}}/api/pacientes/cadastro"
+          }
+        },
+        {
+          "name": "Atualizar paciente",
+          "request": {
+            "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{jwt}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Dr. Carlos\",\n  \"email\": \"carlos@sorrisus.com\",\n  \"senha\": \"123456\",\n  \"role\": \"ROLE_DENTISTA\",\n  \"cro\": \"12345-PB\",\n  \"especialidade\": \"Ortodontia\"\n}"
+              "raw": "{\n  \"nome\": \"Carlos de Souza Lima\",\n  \"email\": \"carlos.lima@sorrisus.com\",\n  \"senha\": \"novaSenha123\",\n  \"cpf\": \"12345678901\",\n  \"telefone\": \"83997776666\",\n  \"dataNascimento\": \"1990-05-10\",\n  \"role\": \"ROLE_PACIENTE\"\n}"
             },
-            "url": "{{baseUrl}}/api/dentistas"
+            "url": "{{base_url}}/api/pacientes/1"
+          }
+        },
+        {
+          "name": "Deletar paciente",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/pacientes/1"
           }
         }
       ]
     },
+
     {
-      "name": "Recepcionistas",
+      "name": "💼 Recepcionista",
       "item": [
         {
-          "name": "Listar Recepcionistas",
+          "name": "Listar recepcionistas",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{jwt}}"
-              }
-            ],
-            "url": "{{baseUrl}}/api/recepcionistas"
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/recepcionistas"
           }
         },
         {
-          "name": "Criar Recepcionista",
+          "name": "Buscar recepcionista por ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/recepcionistas/1"
+          }
+        },
+        {
+          "name": "Criar recepcionista",
           "request": {
             "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Fernanda Alves\",\n  \"email\": \"fernanda.alves@sorrisus.com\",\n  \"senha\": \"senhaSegura123\",\n  \"turno\": \"TARDE\",\n  \"role\": \"ROLE_RECEPCIONISTA\"\n}"
+            },
+            "url": "{{base_url}}/api/recepcionistas/cadastro"
+          }
+        },
+        {
+          "name": "Atualizar recepcionista",
+          "request": {
+            "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{jwt}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Ana Lima\",\n  \"email\": \"ana@sorrisus.com\",\n  \"senha\": \"123456\",\n  \"role\": \"ROLE_RECEPCIONISTA\",\n  \"turno\": \"MANHA\"\n}"
+              "raw": "{\n  \"nome\": \"Fernanda Lima Alves\",\n  \"email\": \"fernanda.lima@sorrisus.com\",\n  \"senha\": \"novaSenha123\",\n  \"turno\": \"MANHA\",\n  \"role\": \"ROLE_RECEPCIONISTA\"\n}"
             },
-            "url": "{{baseUrl}}/api/recepcionistas"
+            "url": "{{base_url}}/api/recepcionistas/1"
+          }
+        },
+        {
+          "name": "Deletar recepcionista",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/api/recepcionistas/1"
           }
         }
       ]
     }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" }
   ]
 }

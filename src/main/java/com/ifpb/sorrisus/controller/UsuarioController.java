@@ -3,6 +3,7 @@ package com.ifpb.sorrisus.controller;
 import com.ifpb.sorrisus.model.Usuario;
 import com.ifpb.sorrisus.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.List;
 public class UsuarioController {
 
     private final UsuarioService service;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioController(UsuarioService service) {
+    public UsuarioController(UsuarioService service, PasswordEncoder passwordEncoder) {
         this.service = service;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping
@@ -28,8 +31,9 @@ public class UsuarioController {
         return ResponseEntity.ok(usuario);
     }
 
-    @PostMapping
+    @PostMapping("/cadastro")
     public ResponseEntity<Usuario> criar(@RequestBody Usuario usuario) {
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         return ResponseEntity.ok(service.salvar(usuario));
     }
 

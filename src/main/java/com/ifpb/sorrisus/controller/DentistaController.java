@@ -3,6 +3,7 @@ package com.ifpb.sorrisus.controller;
 import com.ifpb.sorrisus.model.Dentista;
 import com.ifpb.sorrisus.service.DentistaService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.List;
 public class DentistaController {
 
     private final DentistaService service;
+    private final PasswordEncoder passwordEncoder;
 
-    public DentistaController(DentistaService service) {
+    public DentistaController(DentistaService service, PasswordEncoder passwordEncoder) {
         this.service = service;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping
@@ -28,8 +31,9 @@ public class DentistaController {
         return ResponseEntity.ok(dentista);
     }
 
-    @PostMapping
+    @PostMapping("/cadastro")
     public ResponseEntity<Dentista> criar(@RequestBody Dentista dentista) {
+        dentista.setSenha(passwordEncoder.encode(dentista.getSenha()));
         return ResponseEntity.ok(service.salvar(dentista));
     }
 

@@ -77,5 +77,5 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleBadCredentials(BadCredentialsException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(buildResponse(HttpStatus.UNAUTHORIZED, "Credenciais inválidas.", request.getRequestURI()));
-}
+    }
 }
