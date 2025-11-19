@@ -2,6 +2,8 @@ package com.ifpb.sorrisus.config;
 
 import com.ifpb.sorrisus.security.JWTUtil;
 import com.ifpb.sorrisus.security.filter.JwtAuthenticationFilter;
+import com.ifpb.sorrisus.security.handler.CustomAccessDeniedHandler;
+import com.ifpb.sorrisus.security.handler.CustomAuthenticationEntryPoint;
 import com.ifpb.sorrisus.security.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,10 +23,17 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JWTUtil jwtUtil;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService, JWTUtil jwtUtil) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService,
+                        JWTUtil jwtUtil,
+                        CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
+                        CustomAccessDeniedHandler customAccessDeniedHandler) {
         this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
     @Bean
@@ -46,6 +55,10 @@ public class SecurityConfig {
             .csrf().disable()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint(customAuthenticationEntryPoint) 
+                .accessDeniedHandler(customAccessDeniedHandler)           
+            )
             .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers("/api/auth/**", "/api/usuarios/cadastro", "/api/dentistas/cadastro", "/api/recepcionistas/cadastro", "/api/pacientes/cadastro").permitAll()
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()

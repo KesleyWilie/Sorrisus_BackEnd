@@ -1,6 +1,5 @@
-package com.ifpb.sorrisus.handler;
+package com.ifpb.sorrisus.exception;
 
-import com.ifpb.sorrisus.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
