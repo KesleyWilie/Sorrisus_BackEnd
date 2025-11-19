@@ -14,6 +14,11 @@ public class JWTUtil {
     private final Key key;
     private final long jwtExpirationMs;
 
+    public JWTUtil() {
+        this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        this.jwtExpirationMs = 360000; 
+    }
+
     public JWTUtil(@Value("${jwt.secret}") String jwtSecret,
                    @Value("${jwt.expiration-ms}") long jwtExpirationMs) {
         if (jwtSecret == null || jwtSecret.trim().length() < 32) {
