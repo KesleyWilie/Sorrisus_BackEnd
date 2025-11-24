@@ -1,6 +1,7 @@
 package com.ifpb.sorrisus.controller;
 
 import com.ifpb.sorrisus.model.Paciente;
+import com.ifpb.sorrisus.model.Role;
 import com.ifpb.sorrisus.service.PacienteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +35,7 @@ public class PacienteController {
 
     @PostMapping("/cadastro")
     public ResponseEntity<Paciente> criar(@RequestBody Paciente paciente) {
+        paciente.setRole(Role.ROLE_PACIENTE);
         paciente.setSenha(passwordEncoder.encode(paciente.getSenha()));
         return ResponseEntity.ok(service.salvar(paciente));
     }

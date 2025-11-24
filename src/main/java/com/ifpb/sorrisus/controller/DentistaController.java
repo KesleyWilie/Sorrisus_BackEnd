@@ -1,6 +1,7 @@
 package com.ifpb.sorrisus.controller;
 
 import com.ifpb.sorrisus.model.Dentista;
+import com.ifpb.sorrisus.model.Role;
 import com.ifpb.sorrisus.service.DentistaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,7 @@ public class DentistaController {
 
     @PostMapping("/cadastro")
     public ResponseEntity<Dentista> criar(@RequestBody Dentista dentista) {
+        dentista.setRole(Role.ROLE_DENTISTA);
         dentista.setSenha(passwordEncoder.encode(dentista.getSenha()));
         return ResponseEntity.ok(service.salvar(dentista));
     }
