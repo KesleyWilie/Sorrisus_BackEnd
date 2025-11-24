@@ -126,7 +126,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Dra. Ana Paula\",\n  \"email\": \"ana.paula@sorrisus.com\",\n  \"senha\": \"senhaSegura123\",\n  \"cro\": \"CRO98765\",\n  \"especialidade\": \"Ortodontia\",\n  \"role\": \"ROLE_DENTISTA\"\n}"
+              "raw": "{\n  \"nome\": \"Dra. Ana Paula\",\n  \"email\": \"ana.paula@sorrisus.com\",\n  \"senha\": \"senhaSegura123\",\n  \"cro\": \"98765-PB\",\n  \"especialidade\": \"Ortodontia\",\n  \"role\": \"ROLE_DENTISTA\"\n}"
             },
             "url": "{{base_url}}/api/dentistas/cadastro"
           }
@@ -141,7 +141,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Dra. Ana Paula Nunes\",\n  \"email\": \"ana.nunes@sorrisus.com\",\n  \"senha\": \"novaSenha123\",\n  \"cro\": \"CRO98765\",\n  \"especialidade\": \"Implantodontia\",\n  \"role\": \"ROLE_DENTISTA\"\n}"
+              "raw": "{\n  \"nome\": \"Dra. Ana Paula Nunes\",\n  \"email\": \"ana.nunes@sorrisus.com\",\n  \"senha\": \"novaSenha123\",\n  \"cro\": \"98765-PB\",\n  \"especialidade\": \"Implantodontia\",\n  \"role\": \"ROLE_DENTISTA\"\n}"
             },
             "url": "{{base_url}}/api/dentistas/1"
           }
