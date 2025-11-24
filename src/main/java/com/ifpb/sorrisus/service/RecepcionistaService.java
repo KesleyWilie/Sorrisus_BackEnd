@@ -24,6 +24,12 @@ public class RecepcionistaService {
     }
 
     public Recepcionista salvar(Recepcionista recepcionista) {
+        if (recepcionista.getEmail() == null || recepcionista.getEmail().isBlank()) {
+            throw new InvalidFieldException("email", "O email é obrigatório.");
+        }
+        if (recepcionistaRepository.existsByEmail(recepcionista.getEmail())) {
+            throw new EmailAlreadyExistsException(recepcionista.getEmail());
+        }
 
         if (recepcionista.getTurno() == null) {
             throw new InvalidFieldException("turno", "O turno é obrigatório.");
@@ -49,6 +55,11 @@ public class RecepcionistaService {
 
     public Recepcionista atualizar(Long id, Recepcionista atualizado) {
         Recepcionista existente = buscarPorId(id);
+
+        if (!existente.getEmail().equals(atualizado.getEmail())
+                && recepcionistaRepository.existsByEmail(atualizado.getEmail())) {
+            throw new EmailAlreadyExistsException(atualizado.getEmail());
+        }
 
         if (!turnoValido(atualizado.getTurno())) {
             throw new InvalidFieldException("turno",

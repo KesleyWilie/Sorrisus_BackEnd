@@ -22,6 +22,13 @@ public class DentistaService {
 
     public Dentista salvar(Dentista dentista) {
 
+        if (dentista.getEmail() == null || dentista.getEmail().isBlank()) {
+            throw new InvalidFieldException("email", "O email é obrigatório.");
+        }
+        if (dentistaRepository.existsByEmail(dentista.getEmail())) {
+            throw new EmailAlreadyExistsException(dentista.getEmail());
+        }
+
         if (dentista.getCro() == null) {
             throw new InvalidFieldException("cro", "O CRO é obrigatório.");
         }
@@ -53,6 +60,11 @@ public class DentistaService {
 
     public Dentista atualizar(Long id, Dentista atualizado) {
         Dentista existente = buscarPorId(id);
+
+        if (!existente.getEmail().equals(atualizado.getEmail())
+                && dentistaRepository.existsByEmail(atualizado.getEmail())) {
+            throw new EmailAlreadyExistsException(atualizado.getEmail());
+        }
 
         if (!existente.getCro().equals(atualizado.getCro()) &&
                 dentistaRepository.existsByCro(atualizado.getCro())) {

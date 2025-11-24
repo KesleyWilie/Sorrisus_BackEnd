@@ -23,6 +23,13 @@ public class PacienteService {
 
     public Paciente salvar(Paciente paciente) {
 
+        if (paciente.getEmail() == null || paciente.getEmail().isBlank()) {
+            throw new InvalidFieldException("email", "O email é obrigatório.");
+        }
+        if (pacienteRepository.existsByEmail(paciente.getEmail())) {
+            throw new EmailAlreadyExistsException(paciente.getEmail());
+        }
+
         if (paciente.getCpf() == null) {
             throw new InvalidFieldException("cpf", "O CPF é obrigatório.");
         }
@@ -60,6 +67,11 @@ public class PacienteService {
     public Paciente atualizar(Long id, Paciente atualizado) {
         Paciente existente = buscarPorId(id);
 
+        if (!existente.getEmail().equals(atualizado.getEmail())
+                && pacienteRepository.existsByEmail(atualizado.getEmail())) {
+            throw new EmailAlreadyExistsException(atualizado.getEmail());
+        }
+
         if (!existente.getCpf().equals(atualizado.getCpf())
                 && pacienteRepository.existsByCpf(atualizado.getCpf())) {
             throw new CPFAlreadyExistsException(atualizado.getCpf());
@@ -73,6 +85,7 @@ public class PacienteService {
         existente.setCpf(atualizado.getCpf());
         existente.setTelefone(atualizado.getTelefone());
         existente.setDataNascimento(atualizado.getDataNascimento());
+        existente.setEmail(atualizado.getEmail());
 
         return pacienteRepository.save(existente);
     }
