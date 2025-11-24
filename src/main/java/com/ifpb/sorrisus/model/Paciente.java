@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+import org.hibernate.validator.constraints.br.CPF;
+
 @Entity
 @Table(name = "pacientes")
 @Data
@@ -13,6 +15,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = true)
 public class Paciente extends Usuario {
 
+    @CPF
     @Column(nullable = false, unique = true)
     private String cpf;
 
