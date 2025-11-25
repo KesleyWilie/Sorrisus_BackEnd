@@ -34,11 +34,14 @@ class AuthControllerTest {
 
     private AuthController authController;
 
+    @Mock
+    private com.ifpb.sorrisus.service.UsuarioService usuarioService;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         jwtUtil = new JWTUtil(); 
-        authController = new AuthController(authenticationManager, jwtUtil, 3600000L);
+        authController = new AuthController(authenticationManager, jwtUtil, usuarioService, 3600000L);
     }
 
     @Test
@@ -55,6 +58,12 @@ class AuthControllerTest {
         request.setEmail("maria@sorrisus.com");
         request.setPassword("senha");
 
+        com.ifpb.sorrisus.model.Usuario usuario = new com.ifpb.sorrisus.model.Usuario();
+        usuario.setId(1L);
+        usuario.setEmail("maria@sorrisus.com");
+
+        when(usuarioService.buscarPorEmail("maria@sorrisus.com")).thenReturn(usuario);
+
         ResponseEntity<?> response = authController.login(request);
 
         assertThat(response).isNotNull();
@@ -64,6 +73,7 @@ class AuthControllerTest {
         assertThat(body.getAccessToken()).isNotBlank();
         assertThat(body.getTokenType()).isEqualTo("Bearer");
         assertThat(body.getEmail()).isEqualTo("maria@sorrisus.com");
+        assertThat(body.getUserId()).isEqualTo(1);
         assertThat(body.getExpiresIn()).isGreaterThan(0);
     }
 

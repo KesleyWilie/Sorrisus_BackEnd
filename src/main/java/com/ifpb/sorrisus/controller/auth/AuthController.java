@@ -18,12 +18,15 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
     private final long jwtExpirationMs;
+    private final com.ifpb.sorrisus.service.UsuarioService usuarioService;
 
     public AuthController(AuthenticationManager authenticationManager,
                           JWTUtil jwtUtil,
+                          com.ifpb.sorrisus.service.UsuarioService usuarioService,
                           @Value("${jwt.expiration-ms}") long jwtExpirationMs) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.usuarioService = usuarioService;
         this.jwtExpirationMs = jwtExpirationMs;
     }
 
@@ -40,7 +43,10 @@ public class AuthController {
                 .findFirst().map(Object::toString).orElse("");
         String token = jwtUtil.generateToken(userDetails.getUsername(), role);
 
-        return ResponseEntity.ok(new LoginResponse(token, "Bearer", jwtExpirationMs, userDetails.getUsername(), role));
+        var usuario = usuarioService.buscarPorEmail(userDetails.getUsername());
+        int userId = usuario.getId() == null ? 0 : Math.toIntExact(usuario.getId());
+
+        return ResponseEntity.ok(new LoginResponse(token, "Bearer", jwtExpirationMs, userId, userDetails.getUsername(), role));
     }
 
 }
