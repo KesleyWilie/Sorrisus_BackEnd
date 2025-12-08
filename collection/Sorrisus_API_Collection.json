@@ -42,7 +42,6 @@
         }
       ]
     },
-
     {
       "name": "🧍 Usuário",
       "item": [
@@ -99,7 +98,6 @@
         }
       ]
     },
-
     {
       "name": "🦷 Dentista",
       "item": [
@@ -156,7 +154,6 @@
         }
       ]
     },
-
     {
       "name": "🧾 Paciente",
       "item": [
@@ -213,7 +210,6 @@
         }
       ]
     },
-
     {
       "name": "💼 Recepcionista",
       "item": [
@@ -266,6 +262,191 @@
             "method": "DELETE",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
             "url": "{{base_url}}/api/recepcionistas/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📅 Agendamento",
+      "item": [
+        {
+          "name": "Agendamentos - Criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHora\": \"2025-08-14T10:30:00\",\n  \"pacienteId\": 1,\n  \"dentistaId\": 1,\n  \"servicoId\": 1,\n  \"observacao\": \"Consulta de rotina\"\n}"
+            },
+            "url": "{{base_url}}/api/agendamentos"
+          }
+        },
+        {
+          "name": "Agendamentos - Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHora\": \"2025-08-14T11:00:00\",\n  \"pacienteId\": 1,\n  \"dentistaId\": 1,\n  \"servicoId\": 1,\n  \"observacao\": \"Reagendado\"\n}"
+            },
+            "url": "{{base_url}}/api/agendamentos/{{agendamentoId}}"
+          }
+        },
+        {
+          "name": "Agendamentos - Deletar",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/agendamentos/{{agendamentoId}}"
+          }
+        },
+        {
+          "name": "Agendamentos - Confirmar",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/agendamentos/{{agendamentoId}}/confirmar"
+          }
+        },
+        {
+          "name": "Agendamentos - Listar por Paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/agendamentos/paciente/{{pacienteId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📋 Consulta",
+      "item": [
+        {
+          "name": "Consultas - Criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHora\": \"2025-08-14T10:30:00\",\n  \"pacienteId\": 1,\n  \"dentistaId\": 1,\n  \"status\": \"PENDENTE\",\n  \"observacao\": \"Consulta criada manualmente\",\n  \"prontuario\": null\n}"
+            },
+            "url": "{{base_url}}/api/consultas"
+          }
+        },
+        {
+          "name": "Consultas - Atualizar (inclui prontuário)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHora\": \"2025-08-14T12:00:00\",\n  \"pacienteId\": 1,\n  \"dentistaId\": 1,\n  \"status\": \"CONFIRMADA\",\n  \"observacao\": \"Atualizada após atendimento\",\n  \"prontuario\": {\n    \"observacoes\": \"Paciente apresentou sensibilidade\"\n  }\n}"
+            },
+            "url": "{{base_url}}/api/consultas/{{consultaId}}"
+          }
+        },
+        {
+          "name": "Consultas - Alterar Status (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/consultas/{{consultaId}}/status?status=REALIZADA"
+          }
+        },
+        {
+          "name": "Consultas - Cancelar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/consultas/{{consultaId}}"
+          }
+        },
+        {
+          "name": "Consultas - Listar por Paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/consultas/paciente/{{pacienteId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🩺 Prontuário",
+      "item": [
+        {
+          "name": "Prontuários - Criar (opcional: vincular a consulta)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observacoes\": \"Anotações iniciais do prontuário\"\n}"
+            },
+            "url": "{{base_url}}/api/prontuarios?consultaId={{consultaId}}"
+          }
+        },
+        {
+          "name": "Prontuários - Buscar por Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/prontuarios/{{prontuarioId}}"
+          }
+        },
+        {
+          "name": "Prontuários - Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observacoes\": \"Atualização do prontuário após atendimento\"\n}"
+            },
+            "url": "{{base_url}}/api/prontuarios/{{prontuarioId}}"
+          }
+        },
+        {
+          "name": "Prontuários - Deletar",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/prontuarios/{{prontuarioId}}"
           }
         }
       ]

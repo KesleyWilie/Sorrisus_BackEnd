@@ -1,0 +1,108 @@
+package com.ifpb.sorrisus.controller;
+
+import com.ifpb.sorrisus.dto.ConsultaDTO;
+import com.ifpb.sorrisus.dto.ProntuarioDTO;
+import com.ifpb.sorrisus.model.*;
+import com.ifpb.sorrisus.service.ConsultaService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+
+import java.net.URI;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/consultas")
+public class ConsultaController {
+
+    private final ConsultaService service;
+
+    public ConsultaController(ConsultaService service) {
+        this.service = service;
+    }
+
+    @PostMapping
+    public ResponseEntity<ConsultaDTO> criar(@Valid @RequestBody ConsultaDTO dto) {
+        Consulta c = new Consulta();
+        c.setDataHora(dto.getDataHora());
+        c.setObservacao(dto.getObservacao());
+        
+        if (dto.getStatus() != null) {
+            c.setStatus(StatusConsulta.valueOf(dto.getStatus()));
+        } else {
+            c.setStatus(StatusConsulta.CONFIRMADA); 
+        }
+
+        Paciente p = new Paciente(); p.setId(dto.getPacienteId());
+        Dentista d = new Dentista(); d.setId(dto.getDentistaId());
+        c.setPaciente(p);
+        c.setDentista(d);
+
+        if (dto.getProntuario() != null) {
+            Prontuario prontuario = new Prontuario();
+            prontuario.setObservacoes(dto.getProntuario().getObservacoes());
+            c.setProntuario(prontuario);
+        }
+
+        Consulta salvo = service.criar(c);
+        
+        return ResponseEntity.created(URI.create("/api/consultas/" + salvo.getId())).body(toDTO(salvo));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ConsultaDTO> atualizar(@PathVariable Long id, @Valid @RequestBody ConsultaDTO dto) {
+        Consulta c = new Consulta();
+        c.setDataHora(dto.getDataHora());
+        c.setObservacao(dto.getObservacao());
+        
+        if (dto.getStatus() != null) c.setStatus(StatusConsulta.valueOf(dto.getStatus()));
+
+        if (dto.getProntuario() != null) {
+            Prontuario p = new Prontuario();
+            p.setObservacoes(dto.getProntuario().getObservacoes());
+            c.setProntuario(p);
+        }
+
+        Consulta atualizado = service.atualizar(id, c);
+        return ResponseEntity.ok(toDTO(atualizado));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ConsultaDTO> alterarStatus(@PathVariable Long id, @RequestParam String status) {
+        Consulta c = new Consulta();
+        c.setStatus(StatusConsulta.valueOf(status));
+        Consulta salvo = service.atualizar(id, c);
+        return ResponseEntity.ok(toDTO(salvo));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancelar(@PathVariable Long id) {
+        service.cancelar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/paciente/{pacienteId}")
+    public ResponseEntity<List<ConsultaDTO>> listarPorPaciente(@PathVariable Long pacienteId) {
+        List<ConsultaDTO> list = service.listarPorPaciente(pacienteId).stream()
+                .map(this::toDTO).collect(Collectors.toList());
+        return ResponseEntity.ok(list);
+    }
+
+    private ConsultaDTO toDTO(Consulta c) {
+        ConsultaDTO dto = new ConsultaDTO();
+        dto.setId(c.getId());
+        dto.setDataHora(c.getDataHora());
+        dto.setDentistaId(c.getDentista().getId());
+        dto.setPacienteId(c.getPaciente().getId());
+        dto.setStatus(c.getStatus().name());
+        dto.setObservacao(c.getObservacao());
+        if (c.getProntuario() != null) {
+            ProntuarioDTO p = new ProntuarioDTO();
+            p.setId(c.getProntuario().getId());
+            p.setObservacoes(c.getProntuario().getObservacoes());
+            dto.setProntuario(p);
+        }
+        return dto;
+    }
+}
