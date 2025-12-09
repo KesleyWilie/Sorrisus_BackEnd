@@ -42,7 +42,33 @@ public class ProntuarioService {
     @Transactional
     public Prontuario atualizar(Long id, Prontuario atualizado) {
         Prontuario existente = buscarPorId(id);
+
+        existente.setAlergiaResposta(atualizado.getAlergiaResposta());
+        existente.setAlergiaNotas(atualizado.getAlergiaNotas());
+
+        existente.setAntibioticoResposta(atualizado.getAntibioticoResposta());
+        existente.setAntibioticoNotas(atualizado.getAntibioticoNotas());
+
+        existente.setAnestesicoResposta(atualizado.getAnestesicoResposta());
+        existente.setAnestesicoNotas(atualizado.getAnestesicoNotas());
+
+        existente.setSensibilidadeResposta(atualizado.getSensibilidadeResposta());
+        existente.setSensibilidadeNotas(atualizado.getSensibilidadeNotas());
+
+        existente.setPressaoResposta(atualizado.getPressaoResposta());
+        existente.setPressaoNotas(atualizado.getPressaoNotas());
+
+        existente.setMedicamentoResposta(atualizado.getMedicamentoResposta());
+        existente.setMedicamentoNotas(atualizado.getMedicamentoNotas());
+
+        existente.setProblemaSaudeResposta(atualizado.getProblemaSaudeResposta());
+        existente.setProblemaSaudeNotas(atualizado.getProblemaSaudeNotas());
+
         existente.setObservacoes(atualizado.getObservacoes());
+        existente.setPlanoTratamento(atualizado.getPlanoTratamento());
+
+        existente.setOdontogramaJson(atualizado.getOdontogramaJson());
+
         return prontuarioRepository.save(existente);
     }
 

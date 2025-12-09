@@ -24,13 +24,12 @@ public class ProntuarioController {
     @PreAuthorize("hasRole('DENTISTA')")
     public ResponseEntity<ProntuarioDTO> criar(@Valid @RequestBody ProntuarioDTO dto,
                                                @RequestParam(required = false) Long consultaId) {
-        Prontuario p = new Prontuario();
-        p.setObservacoes(dto.getObservacoes());
+        Prontuario p = fromDTO(dto);
 
         Prontuario salvo = prontuarioService.criar(p, consultaId);
 
-        ProntuarioDTO resp = toDTO(salvo);
-        return ResponseEntity.created(URI.create("/api/prontuarios/" + salvo.getId())).body(resp);
+        return ResponseEntity.created(URI.create("/api/prontuarios/" + salvo.getId()))
+                .body(toDTO(salvo));
     }
 
     @GetMapping("/{id}")
@@ -59,8 +58,68 @@ public class ProntuarioController {
 
     private ProntuarioDTO toDTO(Prontuario p) {
         ProntuarioDTO dto = new ProntuarioDTO();
+        
         dto.setId(p.getId());
+
+        dto.setAlergiaResposta(p.getAlergiaResposta());
+        dto.setAlergiaNotas(p.getAlergiaNotas());
+
+        dto.setAntibioticoResposta(p.getAntibioticoResposta());
+        dto.setAntibioticoNotas(p.getAntibioticoNotas());
+
+        dto.setAnestesicoResposta(p.getAnestesicoResposta());
+        dto.setAnestesicoNotas(p.getAnestesicoNotas());
+
+        dto.setSensibilidadeResposta(p.getSensibilidadeResposta());
+        dto.setSensibilidadeNotas(p.getSensibilidadeNotas());
+
+        dto.setPressaoResposta(p.getPressaoResposta());
+        dto.setPressaoNotas(p.getPressaoNotas());
+
+        dto.setMedicamentoResposta(p.getMedicamentoResposta());
+        dto.setMedicamentoNotas(p.getMedicamentoNotas());
+
+        dto.setProblemaSaudeResposta(p.getProblemaSaudeResposta());
+        dto.setProblemaSaudeNotas(p.getProblemaSaudeNotas());
+
         dto.setObservacoes(p.getObservacoes());
+        dto.setPlanoTratamento(p.getPlanoTratamento());
+
+        dto.setOdontogramaJson(p.getOdontogramaJson());
+
         return dto;
     }
+
+    private Prontuario fromDTO(ProntuarioDTO dto) {
+        Prontuario p = new Prontuario();
+
+        p.setAlergiaResposta(dto.getAlergiaResposta());
+        p.setAlergiaNotas(dto.getAlergiaNotas());
+
+        p.setAntibioticoResposta(dto.getAntibioticoResposta());
+        p.setAntibioticoNotas(dto.getAntibioticoNotas());
+
+        p.setAnestesicoResposta(dto.getAnestesicoResposta());
+        p.setAnestesicoNotas(dto.getAnestesicoNotas());
+
+        p.setSensibilidadeResposta(dto.getSensibilidadeResposta());
+        p.setSensibilidadeNotas(dto.getSensibilidadeNotas());
+
+        p.setPressaoResposta(dto.getPressaoResposta());
+        p.setPressaoNotas(dto.getPressaoNotas());
+
+        p.setMedicamentoResposta(dto.getMedicamentoResposta());
+        p.setMedicamentoNotas(dto.getMedicamentoNotas());
+
+        p.setProblemaSaudeResposta(dto.getProblemaSaudeResposta());
+        p.setProblemaSaudeNotas(dto.getProblemaSaudeNotas());
+
+        p.setObservacoes(dto.getObservacoes());
+        p.setPlanoTratamento(dto.getPlanoTratamento());
+
+        p.setOdontogramaJson(dto.getOdontogramaJson());
+
+        return p;
+    }
+
 }
