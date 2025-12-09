@@ -82,6 +82,12 @@ public class ConsultaController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ConsultaDTO> buscarPorId(@PathVariable Long id) {
+        Consulta c = service.buscarPorId(id);
+        return ResponseEntity.ok(toDTO(c));
+    }
+
     @GetMapping("/paciente/{pacienteId}")
     public ResponseEntity<List<ConsultaDTO>> listarPorPaciente(@PathVariable Long pacienteId) {
         List<ConsultaDTO> list = service.listarPorPaciente(pacienteId).stream()
