@@ -89,6 +89,13 @@ public class ConsultaController {
         return ResponseEntity.ok(list);
     }
 
+    @GetMapping("/dentista/{dentistaId}")
+    public ResponseEntity<List<ConsultaDTO>> listarPorDentista(@PathVariable Long dentistaId) {
+        List<ConsultaDTO> list = service.listarPorDentista(dentistaId).stream()
+                .map(this::toDTO).collect(Collectors.toList());
+        return ResponseEntity.ok(list);
+    }
+
     private ConsultaDTO toDTO(Consulta c) {
         ConsultaDTO dto = new ConsultaDTO();
         dto.setId(c.getId());
