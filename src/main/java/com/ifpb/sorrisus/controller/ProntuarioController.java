@@ -1,7 +1,6 @@
 package com.ifpb.sorrisus.controller;
 
 import com.ifpb.sorrisus.dto.ProntuarioDTO;
-import com.ifpb.sorrisus.model.Prontuario;
 import com.ifpb.sorrisus.service.ProntuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,46 +20,26 @@ public class ProntuarioController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('DENTISTA')")
-    public ResponseEntity<ProntuarioDTO> criar(@Valid @RequestBody ProntuarioDTO dto,
-                                               @RequestParam(required = false) Long consultaId) {
-        Prontuario p = new Prontuario();
-        p.setObservacoes(dto.getObservacoes());
+    @PreAuthorize("hasRole('DENTISTA')") 
+    public ResponseEntity<ProntuarioDTO> salvar(@Valid @RequestBody ProntuarioDTO dto,
+                                                @RequestParam Long consultaId) {
+        
+        ProntuarioDTO salvo = prontuarioService.salvarFichaClinica(dto, consultaId);
 
-        Prontuario salvo = prontuarioService.criar(p, consultaId);
-
-        ProntuarioDTO resp = toDTO(salvo);
-        return ResponseEntity.created(URI.create("/api/prontuarios/" + salvo.getId())).body(resp);
+        return ResponseEntity.created(URI.create("/api/prontuarios/" + salvo.getId()))
+                .body(salvo);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ProntuarioDTO> buscarPorId(@PathVariable Long id) {
-        Prontuario p = prontuarioService.buscarPorId(id);
-        return ResponseEntity.ok(toDTO(p));
+    @GetMapping("/consulta/{consultaId}")
+    public ResponseEntity<ProntuarioDTO> buscarPorConsulta(@PathVariable Long consultaId) {
+        ProntuarioDTO dto = prontuarioService.buscarPorConsultaId(consultaId);
+        return ResponseEntity.ok(dto);
     }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('DENTISTA')")
-    public ResponseEntity<ProntuarioDTO> atualizar(@PathVariable Long id, @Valid @RequestBody ProntuarioDTO dto) {
-        Prontuario atualizado = new Prontuario();
-        atualizado.setObservacoes(dto.getObservacoes());
-
-        Prontuario salvo = prontuarioService.atualizar(id, atualizado);
-        return ResponseEntity.ok(toDTO(salvo));
-    }
-
     
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('DENTISTA')")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         prontuarioService.deletar(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private ProntuarioDTO toDTO(Prontuario p) {
-        ProntuarioDTO dto = new ProntuarioDTO();
-        dto.setId(p.getId());
-        dto.setObservacoes(p.getObservacoes());
-        return dto;
     }
 }

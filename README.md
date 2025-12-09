@@ -80,6 +80,8 @@ Atualmente, o backend do sistema conta com:
   * `Dentista`
   * `Recepcionista`
   * `Role` (enum de papéis de usuário)
+  * `Agendamento` / `Consulta`
+  * `Prontuario` / `Anamnese`
 
 * **CRUD completo** (Create, Read, Update, Delete) para todas as entidades.
 * **Autenticação JWT** com filtro, validação e roles.
@@ -89,9 +91,11 @@ Atualmente, o backend do sistema conta com:
 * **Uso de variáveis de ambiente** para dados sensíveis.
 * **Projeto configurado com Lombok** e **Spring DevTools**.
 
-## 📅 Fluxo de Agendamento, Consulta e Prontuário (Novo)
+## Fluxo de Agendamento, Consulta e Prontuário
 
-O sistema implementa as regras de negócio para **Manter Agenda** e **Manter Prontuário Eletrônico**. Abaixo está o fluxo correto para realizar um atendimento clínico dentro da API:
+O sistema implementa as regras de negócio para **Manter Agenda (UC06)**, **Manter Prontuário (UC10)** e **Preencher Anamnese (UC11)**.
+
+Devido à arquitetura aprimorada, o sistema agora separa logicamente os dados de saúde do paciente (Anamnese) dos dados da visita atual (Prontuário), mas facilita a operação para o Frontend através de um único endpoint.
 
 ### 1. Criar um Agendamento
 O processo inicia com a reserva de um horário na agenda. O sistema valida se o horário está disponível para o dentista selecionado.
@@ -103,23 +107,25 @@ O processo inicia com a reserva de um horário na agenda. O sistema valida se o 
 Para que o agendamento se torne efetivo, ele deve ser confirmado. Ao confirmar, o sistema **automaticamente gera uma Consulta**.
 
 * **Endpoint:** `POST /api/agendamentos/{id}/confirmar`
-* **Regra de Negócio:** O sistema verifica novamente conflitos de horário. Se válido, muda o status do agendamento para `CONFIRMADO` e cria um registro na tabela `Consulta`.
+* **Regra de Negócio:** O sistema valida conflitos finais, muda o status do agendamento para `CONFIRMADO` e cria um registro na tabela `Consulta` aguardando atendimento.
 
-### 3. Realizar a Consulta e Atualizar Prontuário
-A consulta criada automaticamente no passo anterior é onde o atendimento clínico ocorre. O dentista pode atualizar o status da consulta e inserir as anotações no prontuário.
+### 3. Realizar Atendimento (Anamnese + Prontuário)
+No momento do atendimento, o dentista preenche a ficha clínica. O backend utiliza um serviço orquestrador (`ProntuarioService`) que recebe um DTO completo e distribui os dados:
+* **Dados de Saúde (Anamnese):** (Ex: Alergias, medicamentos) são salvos na entidade `Anamnese` vinculada ao **Paciente**.
+* **Dados da Visita (Prontuário):** (Ex: Procedimentos, Odontograma) são salvos na entidade `Prontuario` vinculada à **Consulta**.
 
-* **Endpoint:** `PUT /api/consultas/{id}`
-* **Funcionalidade:** Permite atualizar o status (ex: `REALIZADA`), adicionar observações e preencher o objeto `prontuario` vinculado.
-* **Exemplo de Payload:**
+* **Endpoint:** `POST /api/prontuarios?consultaId={id}`
+* **Payload Unificado (Exemplo):**
     ```json
     {
-      "status": "REALIZADA",
-      "observacao": "Paciente relatou dor no dente 16",
-      "prontuario": {
-        "observacoes": "Realizado procedimento de restauração."
-      }
+      "alergiaResposta": "Sim", 
+      "alergiaNotas": "Dipirona",
+      "problemaSaudeResposta": "Não",
+      "observacoes": "Realizada restauração no dente 16.",
+      "odontogramaJson": "{ ... dados do desenho ... }"
     }
     ```
+* **Vantagem:** O frontend envia apenas uma requisição. Se o paciente já possuir anamnese de consultas anteriores, o sistema apenas a atualiza; caso contrário, cria uma nova.
 
 ### Resumo dos Endpoints Principais
 
@@ -127,9 +133,9 @@ A consulta criada automaticamente no passo anterior é onde o atendimento clíni
 | :--- | :--- | :--- | :--- |
 | **Agendamento** | Agendar | `POST /api/agendamentos` | Reserva o horário. |
 | **Agendamento** | Confirmar | `POST .../{id}/confirmar` | Valida e cria a Consulta. |
-| **Consulta** | Atualizar | `PUT /api/consultas/{id}` | Edita status e prontuário. |
-| **Consulta** | Cancelar | `DELETE /api/consultas/{id}` | Cancela o atendimento. |
-| **Prontuário** | Consultar | `GET /api/prontuarios/{id}` | Acessa histórico clínico. |
+| **Consulta** | Listar | `GET /api/consultas/paciente/{id}` | Histórico de atendimentos. |
+| **Prontuário** | Salvar Ficha | `POST /api/prontuarios` | Salva Anamnese e Prontuário juntos. |
+| **Prontuário** | Buscar | `GET .../consulta/{id}` | Recupera ficha completa da visita. |
 
 ## Tecnologias utilizadas
 
@@ -332,6 +338,5 @@ Incluem testes de serviços e agora também testes de autenticação JWT.
 \</tr\>
 \</table\>
 
------
-
+---
 **Instituto Federal da Paraíba** — Disciplina de **Projeto II**.

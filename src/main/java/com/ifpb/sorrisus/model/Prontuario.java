@@ -14,9 +14,16 @@ public class Prontuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 4000)
+    @Column(columnDefinition = "TEXT")
     private String observacoes;
 
-    @OneToOne(mappedBy = "prontuario")
+    @Column(columnDefinition = "TEXT")
+    private String planoTratamento;
+
+    @Column(columnDefinition = "TEXT")
+    private String odontogramaJson;
+
+    @OneToOne
+    @JoinColumn(name = "consulta_id")
     private Consulta consulta;
 }

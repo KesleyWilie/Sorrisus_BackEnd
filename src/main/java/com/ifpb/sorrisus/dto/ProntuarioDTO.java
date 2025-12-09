@@ -5,5 +5,30 @@ import lombok.Data;
 @Data
 public class ProntuarioDTO {
     private Long id;
+    
+    private String alergiaResposta;
+    private String alergiaNotas;
+
+    private String antibioticoResposta;
+    private String antibioticoNotas;
+
+    private String anestesicoResposta;
+    private String anestesicoNotas;
+
+    private String sensibilidadeResposta;
+    private String sensibilidadeNotas;
+
+    private String pressaoResposta;
+    private String pressaoNotas;
+
+    private String medicamentoResposta;
+    private String medicamentoNotas;
+
+    private String problemaSaudeResposta;
+    private String problemaSaudeNotas;
+
     private String observacoes;
+    private String planoTratamento;
+
+    private String odontogramaJson;
 }
