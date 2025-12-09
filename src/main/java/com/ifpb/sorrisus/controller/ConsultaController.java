@@ -28,15 +28,17 @@ public class ConsultaController {
         Consulta c = new Consulta();
         c.setDataHora(dto.getDataHora());
         c.setObservacao(dto.getObservacao());
-        
+
         if (dto.getStatus() != null) {
             c.setStatus(StatusConsulta.valueOf(dto.getStatus()));
         } else {
-            c.setStatus(StatusConsulta.CONFIRMADA); 
+            c.setStatus(StatusConsulta.CONFIRMADA);
         }
 
-        Paciente p = new Paciente(); p.setId(dto.getPacienteId());
-        Dentista d = new Dentista(); d.setId(dto.getDentistaId());
+        Paciente p = new Paciente();
+        p.setId(dto.getPacienteId());
+        Dentista d = new Dentista();
+        d.setId(dto.getDentistaId());
         c.setPaciente(p);
         c.setDentista(d);
 
@@ -47,7 +49,7 @@ public class ConsultaController {
         }
 
         Consulta salvo = service.criar(c);
-        
+
         return ResponseEntity.created(URI.create("/api/consultas/" + salvo.getId())).body(toDTO(salvo));
     }
 
@@ -56,8 +58,9 @@ public class ConsultaController {
         Consulta c = new Consulta();
         c.setDataHora(dto.getDataHora());
         c.setObservacao(dto.getObservacao());
-        
-        if (dto.getStatus() != null) c.setStatus(StatusConsulta.valueOf(dto.getStatus()));
+
+        if (dto.getStatus() != null)
+            c.setStatus(StatusConsulta.valueOf(dto.getStatus()));
 
         if (dto.getProntuario() != null) {
             Prontuario p = new Prontuario();
@@ -83,10 +86,25 @@ public class ConsultaController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ConsultaDTO> buscarPorId(@PathVariable Long id) {
+        Consulta c = service.buscarPorId(id);
+        return ResponseEntity.ok(toDTO(c));
+    }
+
     @GetMapping("/paciente/{pacienteId}")
     public ResponseEntity<List<ConsultaDTO>> listarPorPaciente(@PathVariable Long pacienteId) {
         List<ConsultaDTO> list = service.listarPorPaciente(pacienteId).stream()
                 .map(this::toDTO).collect(Collectors.toList());
+        return ResponseEntity.ok(list);
+    }
+  
+    @GetMapping("/dentista/{dentistaId}")
+    public ResponseEntity<List<ConsultaDTO>> listarPorDentista(@PathVariable Long dentistaId) {
+
+        List<ConsultaDTO> list = service.listarPorDentista(dentistaId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }
 
@@ -131,10 +149,20 @@ public class ConsultaController {
         ConsultaDTO dto = new ConsultaDTO();
         dto.setId(c.getId());
         dto.setDataHora(c.getDataHora());
+
         dto.setDentistaId(c.getDentista().getId());
         dto.setPacienteId(c.getPaciente().getId());
+
+        if (c.getPaciente() != null) {
+            dto.setNomePaciente(c.getPaciente().getNome());
+        }
+        if (c.getDentista() != null) {
+            dto.setNomeDentista(c.getDentista().getNome());
+        }
+
         dto.setStatus(c.getStatus().name());
         dto.setObservacao(c.getObservacao());
+
         if (c.getProntuario() != null) {
             ProntuarioDTO p = new ProntuarioDTO();
             p.setId(c.getProntuario().getId());
