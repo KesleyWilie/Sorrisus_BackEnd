@@ -393,6 +393,26 @@
             ],
             "url": "{{base_url}}/api/consultas/paciente/{{pacienteId}}"
           }
+        },
+        {
+          "name": "Consultas -Listar Retornos Pendentes",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/consultas/retornos-pendentes"
+          }
+        },
+        {
+          "name": "Consultas -Listar Retornos Pendentes por Dentista",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/consultas/retornos-pendentes/dentista/{{dentistaId}}"
+          }
         }
       ]
     },

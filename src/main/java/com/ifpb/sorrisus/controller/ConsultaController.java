@@ -2,6 +2,7 @@ package com.ifpb.sorrisus.controller;
 
 import com.ifpb.sorrisus.dto.ConsultaDTO;
 import com.ifpb.sorrisus.dto.ProntuarioDTO;
+import com.ifpb.sorrisus.dto.RetornoPendenteDTO;
 import com.ifpb.sorrisus.model.*;
 import com.ifpb.sorrisus.service.ConsultaService;
 import org.springframework.http.ResponseEntity;
@@ -97,7 +98,7 @@ public class ConsultaController {
                 .map(this::toDTO).collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }
-
+  
     @GetMapping("/dentista/{dentistaId}")
     public ResponseEntity<List<ConsultaDTO>> listarPorDentista(@PathVariable Long dentistaId) {
 
@@ -105,6 +106,43 @@ public class ConsultaController {
                 .map(this::toDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/retornos-pendentes")
+    public ResponseEntity<List<RetornoPendenteDTO>> listarRetornosPendentes() {
+        List<RetornoPendenteDTO> retornos = service.verificarRetornosPendentes()
+                .stream()
+                .map(this::toRetornoDTO)
+                .toList();
+
+        return ResponseEntity.ok(retornos);
+    }
+
+    @GetMapping("/retornos-pendentes/dentista/{dentistaId}")
+    public ResponseEntity<List<RetornoPendenteDTO>> listarRetornosPendentesPorDentista(
+            @PathVariable Long dentistaId) {
+
+        List<RetornoPendenteDTO> retornos = service.verificarRetornosPendentesPorDentista(dentistaId)
+                .stream()
+                .map(this::toRetornoDTO)
+                .toList();
+
+        return ResponseEntity.ok(retornos);
+    }
+
+
+    private RetornoPendenteDTO toRetornoDTO(RetornoPendente r) {
+        RetornoPendenteDTO dto = new RetornoPendenteDTO();
+        dto.setPacienteId(r.getPaciente().getId());
+        dto.setPacienteNome(r.getPaciente().getNome());
+        dto.setPacienteEmail(r.getPaciente().getEmail());
+        dto.setPacienteTelefone(r.getPaciente().getTelefone());
+        dto.setDataUltimaConsulta(r.getDataUltimaConsulta());
+        dto.setDiasDesdeUltimaConsulta((long) r.getDiasDesdeUltimaConsulta());
+        dto.setDentistaId(r.getUltimaConsulta().getDentista().getId());
+        dto.setDentistaNome(r.getUltimaConsulta().getDentista().getNome());
+        dto.setPrioridade(r.getPrioridade());
+        return dto;
     }
 
     private ConsultaDTO toDTO(Consulta c) {

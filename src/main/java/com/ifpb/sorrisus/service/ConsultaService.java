@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,7 +33,7 @@ public class ConsultaService {
 
     private void validarConflito(Dentista dentista, LocalDateTime dataHora, Long consultaId) {
         boolean conflitoConsulta;
-        
+
         if (consultaId == null) {
             conflitoConsulta = consultaRepository.existsByDentistaAndDataHora(dentista, dataHora);
         } else {
@@ -61,7 +62,7 @@ public class ConsultaService {
 
         consulta.setDentista(dentista);
         consulta.setPaciente(paciente);
-        
+
         if (consulta.getProntuario() != null) {
             Prontuario salvo = prontuarioRepository.save(consulta.getProntuario());
             consulta.setProntuario(salvo);
@@ -86,7 +87,7 @@ public class ConsultaService {
         if (atualizado.getStatus() != null) {
             existente.setStatus(atualizado.getStatus());
         }
-        
+
         if (atualizado.getObservacao() != null) {
             existente.setObservacao(atualizado.getObservacao());
         }
@@ -124,10 +125,79 @@ public class ConsultaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Paciente não encontrado."));
         return consultaRepository.findByPaciente(paciente);
     }
-    
+
     public List<Consulta> listarPorDentista(Long dentistaId) {
          Dentista dentista = dentistaRepository.findById(dentistaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Dentista não encontrado."));
-        return consultaRepository.findByDentistaAndDataHoraBetween(dentista, LocalDateTime.now().minusYears(1), LocalDateTime.now().plusYears(1)); 
+        return consultaRepository.findByDentistaAndDataHoraBetween(dentista, LocalDateTime.now().minusYears(1), LocalDateTime.now().plusYears(1));
+    }
+
+    public List<RetornoPendente> verificarRetornosPendentes() {
+        LocalDateTime seisMesesAtras = LocalDateTime.now().minusMonths(6);
+        List<Paciente> pacientesComRetornoPendente = consultaRepository.findPacientesComUltimaConsultaAntesDe(seisMesesAtras);
+
+        List<RetornoPendente> retornosPendentes = new ArrayList<>();
+
+        for (Paciente paciente : pacientesComRetornoPendente) {
+            List<Consulta> ultimasConsultas = consultaRepository.findUltimaConsultaRealizadaPorPaciente(paciente);
+
+            if (!ultimasConsultas.isEmpty()) {
+                Consulta ultimaConsulta = ultimasConsultas.get(0);
+
+                RetornoPendente retornoPendente = new RetornoPendente();
+                retornoPendente.setPaciente(paciente);
+                retornoPendente.setUltimaConsulta(ultimaConsulta);
+                retornoPendente.setDataUltimaConsulta(ultimaConsulta.getDataHora());
+                retornoPendente.setDiasDesdeUltimaConsulta(calcularDiasDesdeUltimaConsulta(ultimaConsulta.getDataHora()));
+                retornoPendente.setPrioridade(calcularPrioridade(ultimaConsulta.getDataHora()));
+
+                retornosPendentes.add(retornoPendente);
+            }
+        }
+
+        retornosPendentes.sort((r1, r2) -> Integer.compare(r2.getDiasDesdeUltimaConsulta(), r1.getDiasDesdeUltimaConsulta()));
+
+        return retornosPendentes;
+    }
+
+    public List<RetornoPendente> verificarRetornosPendentesPorDentista(Long dentistaId) {
+        Dentista dentista = dentistaRepository.findById(dentistaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Dentista não encontrado."));
+
+        List<RetornoPendente> todosRetornos = verificarRetornosPendentes();
+
+        return todosRetornos.stream()
+                .filter(retorno -> retorno.getUltimaConsulta().getDentista().getId().equals(dentistaId))
+                .toList();
+    }
+
+    public List<Paciente> buscarPacientesSemConsulta() {
+        List<Paciente> todosPacientes = pacienteRepository.findAll();
+        List<Paciente> pacientesSemConsulta = new ArrayList<>();
+
+        for (Paciente paciente : todosPacientes) {
+            List<Consulta> consultasRealizadas = consultaRepository.findUltimaConsultaRealizadaPorPaciente(paciente);
+            if (consultasRealizadas.isEmpty()) {
+                pacientesSemConsulta.add(paciente);
+            }
+        }
+
+        return pacientesSemConsulta;
+    }
+
+    private int calcularDiasDesdeUltimaConsulta(LocalDateTime dataUltimaConsulta) {
+        return (int) java.time.Duration.between(dataUltimaConsulta, LocalDateTime.now()).toDays();
+    }
+
+    private String calcularPrioridade(LocalDateTime dataUltimaConsulta) {
+        int dias = calcularDiasDesdeUltimaConsulta(dataUltimaConsulta);
+
+        if (dias >= 365) {
+            return "ALTA";
+        } else if (dias >= 270) {
+            return "MÉDIA";
+        } else {
+            return "BAIXA";
+        }
     }
 }
