@@ -1,7 +1,6 @@
 package com.ifpb.sorrisus.controller;
 
 import com.ifpb.sorrisus.dto.ProntuarioDTO;
-import com.ifpb.sorrisus.model.Prontuario;
 import com.ifpb.sorrisus.service.ProntuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,33 +20,21 @@ public class ProntuarioController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('DENTISTA')")
-    public ResponseEntity<ProntuarioDTO> criar(@Valid @RequestBody ProntuarioDTO dto,
-                                               @RequestParam(required = false) Long consultaId) {
-        Prontuario p = fromDTO(dto);
-
-        Prontuario salvo = prontuarioService.criar(p, consultaId);
+    @PreAuthorize("hasRole('DENTISTA')") 
+    public ResponseEntity<ProntuarioDTO> salvar(@Valid @RequestBody ProntuarioDTO dto,
+                                                @RequestParam Long consultaId) {
+        
+        ProntuarioDTO salvo = prontuarioService.salvarFichaClinica(dto, consultaId);
 
         return ResponseEntity.created(URI.create("/api/prontuarios/" + salvo.getId()))
-                .body(toDTO(salvo));
+                .body(salvo);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ProntuarioDTO> buscarPorId(@PathVariable Long id) {
-        Prontuario p = prontuarioService.buscarPorId(id);
-        return ResponseEntity.ok(toDTO(p));
+    @GetMapping("/consulta/{consultaId}")
+    public ResponseEntity<ProntuarioDTO> buscarPorConsulta(@PathVariable Long consultaId) {
+        ProntuarioDTO dto = prontuarioService.buscarPorConsultaId(consultaId);
+        return ResponseEntity.ok(dto);
     }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('DENTISTA')")
-    public ResponseEntity<ProntuarioDTO> atualizar(@PathVariable Long id, @Valid @RequestBody ProntuarioDTO dto) {
-        Prontuario atualizado = new Prontuario();
-        atualizado.setObservacoes(dto.getObservacoes());
-
-        Prontuario salvo = prontuarioService.atualizar(id, atualizado);
-        return ResponseEntity.ok(toDTO(salvo));
-    }
-
     
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('DENTISTA')")
@@ -55,71 +42,4 @@ public class ProntuarioController {
         prontuarioService.deletar(id);
         return ResponseEntity.noContent().build();
     }
-
-    private ProntuarioDTO toDTO(Prontuario p) {
-        ProntuarioDTO dto = new ProntuarioDTO();
-        
-        dto.setId(p.getId());
-
-        dto.setAlergiaResposta(p.getAlergiaResposta());
-        dto.setAlergiaNotas(p.getAlergiaNotas());
-
-        dto.setAntibioticoResposta(p.getAntibioticoResposta());
-        dto.setAntibioticoNotas(p.getAntibioticoNotas());
-
-        dto.setAnestesicoResposta(p.getAnestesicoResposta());
-        dto.setAnestesicoNotas(p.getAnestesicoNotas());
-
-        dto.setSensibilidadeResposta(p.getSensibilidadeResposta());
-        dto.setSensibilidadeNotas(p.getSensibilidadeNotas());
-
-        dto.setPressaoResposta(p.getPressaoResposta());
-        dto.setPressaoNotas(p.getPressaoNotas());
-
-        dto.setMedicamentoResposta(p.getMedicamentoResposta());
-        dto.setMedicamentoNotas(p.getMedicamentoNotas());
-
-        dto.setProblemaSaudeResposta(p.getProblemaSaudeResposta());
-        dto.setProblemaSaudeNotas(p.getProblemaSaudeNotas());
-
-        dto.setObservacoes(p.getObservacoes());
-        dto.setPlanoTratamento(p.getPlanoTratamento());
-
-        dto.setOdontogramaJson(p.getOdontogramaJson());
-
-        return dto;
-    }
-
-    private Prontuario fromDTO(ProntuarioDTO dto) {
-        Prontuario p = new Prontuario();
-
-        p.setAlergiaResposta(dto.getAlergiaResposta());
-        p.setAlergiaNotas(dto.getAlergiaNotas());
-
-        p.setAntibioticoResposta(dto.getAntibioticoResposta());
-        p.setAntibioticoNotas(dto.getAntibioticoNotas());
-
-        p.setAnestesicoResposta(dto.getAnestesicoResposta());
-        p.setAnestesicoNotas(dto.getAnestesicoNotas());
-
-        p.setSensibilidadeResposta(dto.getSensibilidadeResposta());
-        p.setSensibilidadeNotas(dto.getSensibilidadeNotas());
-
-        p.setPressaoResposta(dto.getPressaoResposta());
-        p.setPressaoNotas(dto.getPressaoNotas());
-
-        p.setMedicamentoResposta(dto.getMedicamentoResposta());
-        p.setMedicamentoNotas(dto.getMedicamentoNotas());
-
-        p.setProblemaSaudeResposta(dto.getProblemaSaudeResposta());
-        p.setProblemaSaudeNotas(dto.getProblemaSaudeNotas());
-
-        p.setObservacoes(dto.getObservacoes());
-        p.setPlanoTratamento(dto.getPlanoTratamento());
-
-        p.setOdontogramaJson(dto.getOdontogramaJson());
-
-        return p;
-    }
-
 }
