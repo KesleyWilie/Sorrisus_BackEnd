@@ -101,12 +101,7 @@ public class ConsultaController {
     @GetMapping("/dentista/{dentistaId}")
     public ResponseEntity<List<ConsultaDTO>> listarPorDentista(@PathVariable Long dentistaId) {
         List<ConsultaDTO> list = service.listarPorDentista(dentistaId).stream()
-<<<<<<< HEAD
                 .map(this::toDTO).collect(Collectors.toList());
-=======
-                .map(this::toDTO)
-                .collect(Collectors.toList());
->>>>>>> feat/historico-consultas
         return ResponseEntity.ok(list);
     }
 
