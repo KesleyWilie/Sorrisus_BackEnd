@@ -52,20 +52,15 @@ public class AgendamentoController {
 
         AgendamentoDTO resp = toDTO(salvo);
 
-        // Formatação da data e hora
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
-
-        String dataHoraFormatada = ag.getDataHora().format(formatter);
-
         // Envio de Agendamento para o paciente
         if (paciente.getTelefone() != null) {
             String mensagem = "Olá " + paciente.getNome() + ",\n\n"
                     + "Seu agendamento foi realizado com sucesso.\n"
-                    + "🗓 Data e Horário: " + dataHoraFormatada + "\n"
+                    + "🗓 Data e Horário: " + ag.getDataHora().format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm")) + "\n"
                     + "📍 Local: Rua Francisco de Melo, 304, centro. Sumé-PB " + "\n\n"
-                    + "Por favor, chegue com 10 minutos de antecedência e traga seus documentos necessários.\n\n"
+                    + "Por favor, chegue com 10 minutos de antecedência e traga seus documentos pessoais.\n\n"
                     + "Atenciosamente,\n"
-                    + "Equipe [ Sorrisus ]";
+                    + "Equipe Sorrisus";
 
             whatsAppService.sendMessage(paciente.getTelefone(), mensagem);
         }
@@ -100,6 +95,12 @@ public class AgendamentoController {
     public ResponseEntity<AgendamentoDTO> confirmar(@PathVariable Long id) {
         Agendamento confirmado = service.confirmar(id);
         return ResponseEntity.ok(toDTO(confirmado));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AgendamentoDTO> buscarPorId(@PathVariable Long id) {
+        Agendamento a = service.buscarPorId(id);
+        return ResponseEntity.ok(toDTO(a));
     }
 
     @GetMapping("/paciente/{pacienteId}")
