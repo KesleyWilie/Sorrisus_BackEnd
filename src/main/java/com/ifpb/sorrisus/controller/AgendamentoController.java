@@ -6,9 +6,11 @@ import com.ifpb.sorrisus.model.*;
 import com.ifpb.sorrisus.service.AgendamentoService;
 import com.ifpb.sorrisus.repository.DentistaRepository;
 import com.ifpb.sorrisus.repository.PacienteRepository;
+import com.ifpb.sorrisus.service.WhatsAppService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import java.time.format.DateTimeFormatter;
 
 import java.net.URI;
 import java.util.List;
@@ -21,13 +23,16 @@ public class AgendamentoController {
     private final AgendamentoService service;
     private final PacienteRepository pacienteRepository;
     private final DentistaRepository dentistaRepository;
+    private final WhatsAppService whatsAppService;
 
     public AgendamentoController(AgendamentoService service,
                                  PacienteRepository pacienteRepository,
-                                 DentistaRepository dentistaRepository) {
+                                 DentistaRepository dentistaRepository,
+                                 WhatsAppService whatsAppService) {
         this.service = service;
         this.pacienteRepository = pacienteRepository;
         this.dentistaRepository = dentistaRepository;
+        this.whatsAppService = whatsAppService;
     }
 
     @PostMapping
@@ -46,6 +51,25 @@ public class AgendamentoController {
         Agendamento salvo = service.criar(ag);
 
         AgendamentoDTO resp = toDTO(salvo);
+
+        // Formatação da data e hora
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
+
+        String dataHoraFormatada = ag.getDataHora().format(formatter);
+
+        // Envio de Agendamento para o paciente
+        if (paciente.getTelefone() != null) {
+            String mensagem = "Olá " + paciente.getNome() + ",\n\n"
+                    + "Seu agendamento foi realizado com sucesso.\n"
+                    + "🗓 Data e Horário: " + dataHoraFormatada + "\n"
+                    + "📍 Local: Rua Francisco de Melo, 304, centro. Sumé-PB " + "\n\n"
+                    + "Por favor, chegue com 10 minutos de antecedência e traga seus documentos necessários.\n\n"
+                    + "Atenciosamente,\n"
+                    + "Equipe [ Sorrisus ]";
+
+            whatsAppService.sendMessage(paciente.getTelefone(), mensagem);
+        }
+
         return ResponseEntity.created(URI.create("/api/agendamentos/" + salvo.getId())).body(resp);
     }
 
