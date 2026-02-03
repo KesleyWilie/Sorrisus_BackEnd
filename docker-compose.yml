@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  db_sorrisus:
+    image: mysql:8.0
+    container_name: sorrisus-mysql-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: sorrisus_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD} >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+      - sorrisus_net
+
+  sorrisus_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sorrisus-app
+    restart: on-failure
+    depends_on:
+      db_sorrisus:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://db_sorrisus:3306/sorrisus_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      SPRING_DATASOURCE_URL: jdbc:mysql://db_sorrisus:3306/sorrisus_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASS}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+    ports:
+      - "8080:8080"
+    networks:
+      - sorrisus_net
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  mysql_data:
+
+networks:
+  sorrisus_net:
+    driver: bridge

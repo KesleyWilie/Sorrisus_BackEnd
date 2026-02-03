@@ -1,0 +1,1208 @@
+{
+  "info": {
+    "name": "Sorrisus API - CRUDs",
+    "_postman_id": "e015f3c9-f79d-45ef-9e09-f07cb33694a9",
+    "description": "Coleção completa para testar os CRUDs e Auth do sistema Sorrisus.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (gerar token JWT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if(json.accessToken){",
+                  "   pm.collectionVariables.set(\"token\", json.accessToken);",
+                  "   console.log(\"Token atualizado com sucesso!\");",
+                  "} else {",
+                  "   console.log(\"Nenhum token encontrado na resposta.\");",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana.paula@sorrisus.com\",\n  \"password\": \"senhaSegura123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🧍 Usuário",
+      "item": [
+        {
+          "name": "Listar usuários",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar usuário por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar usuário",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Pereira\",\n  \"email\": \"joao.pereira@sorrisus.com\",\n  \"senha\": \"12345678\",\n  \"role\": \"ROLE_RECEPCIONISTA\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/cadastro",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "cadastro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar usuário",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Marcos Pereira\",\n  \"email\": \"joao.marcos@sorrisus.com\",\n  \"senha\": \"senhaNova123\",\n  \"role\": \"ROLE_RECEPCIONISTA\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar usuário",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "usuarios",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🦷 Dentista",
+      "item": [
+        {
+          "name": "Listar dentistas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dentistas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dentistas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar dentista por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dentistas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dentistas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar dentista",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Dra. Ana Paula\",\n  \"email\": \"ana.paula@sorrisus.com\",\n  \"senha\": \"senhaSegura123\",\n  \"cro\": \"98765-PB\",\n  \"especialidade\": \"Ortodontia\",\n  \"role\": \"ROLE_DENTISTA\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/dentistas/cadastro",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dentistas",
+                "cadastro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar dentista",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Dra. Ana Paula Nunes\",\n  \"email\": \"ana.nunes@sorrisus.com\",\n  \"senha\": \"novaSenha123\",\n  \"cro\": \"98765-PB\",\n  \"especialidade\": \"Implantodontia\",\n  \"role\": \"ROLE_DENTISTA\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/dentistas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dentistas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar dentista",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dentistas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dentistas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🧾 Paciente",
+      "item": [
+        {
+          "name": "Listar pacientes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/pacientes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "pacientes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar paciente por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/pacientes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "pacientes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Carlos Souza\",\n  \"email\": \"carlos.souza@sorrisus.com\",\n  \"senha\": \"senhaSegura123\",\n  \"cpf\": \"12345678901\",\n  \"telefone\": \"83998887777\",\n  \"dataNascimento\": \"1990-05-10\",\n  \"role\": \"ROLE_PACIENTE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/pacientes/cadastro",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "pacientes",
+                "cadastro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar paciente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Carlos de Souza Lima\",\n  \"email\": \"carlos.lima@sorrisus.com\",\n  \"senha\": \"novaSenha123\",\n  \"cpf\": \"12345678901\",\n  \"telefone\": \"83997776666\",\n  \"dataNascimento\": \"1990-05-10\",\n  \"role\": \"ROLE_PACIENTE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/pacientes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "pacientes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar paciente",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/pacientes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "pacientes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "💼 Recepcionista",
+      "item": [
+        {
+          "name": "Listar recepcionistas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/recepcionistas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recepcionistas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar recepcionista por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/recepcionistas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recepcionistas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar recepcionista",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Fernanda Alves\",\n  \"email\": \"fernanda.alves@sorrisus.com\",\n  \"senha\": \"senhaSegura123\",\n  \"turno\": \"TARDE\",\n  \"role\": \"ROLE_RECEPCIONISTA\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recepcionistas/cadastro",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recepcionistas",
+                "cadastro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar recepcionista",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Fernanda Lima Alves\",\n  \"email\": \"fernanda.lima@sorrisus.com\",\n  \"senha\": \"novaSenha123\",\n  \"turno\": \"MANHA\",\n  \"role\": \"ROLE_RECEPCIONISTA\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recepcionistas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recepcionistas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar recepcionista",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/recepcionistas/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "recepcionistas",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📅 Agendamento",
+      "item": [
+        {
+          "name": "Agendamentos - Criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHora\": \"2025-08-14T10:30:00\",\n  \"pacienteId\": 1,\n  \"dentistaId\": 1,\n  \"servicoId\": 1,\n  \"observacao\": \"Consulta de rotina\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/agendamentos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "agendamentos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Agendamentos - Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHora\": \"2025-08-14T11:00:00\",\n  \"pacienteId\": 1,\n  \"dentistaId\": 1,\n  \"servicoId\": 1,\n  \"observacao\": \"Reagendado\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/agendamentos/{{agendamentoId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "agendamentos",
+                "{{agendamentoId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Agendamentos - Deletar",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/agendamentos/{{agendamentoId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "agendamentos",
+                "{{agendamentoId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Agendamentos - Confirmar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/agendamentos/{{agendamentoId}}/confirmar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "agendamentos",
+                "{{agendamentoId}}",
+                "confirmar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Agendamentos - Listar por Paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/agendamentos/paciente/{{pacienteId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "agendamentos",
+                "paciente",
+                "{{pacienteId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📋 Consulta",
+      "item": [
+        {
+          "name": "Consultas - Criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHora\": \"2025-08-14T10:30:00\",\n  \"pacienteId\": 3,\n  \"dentistaId\": 2,\n  \"status\": \"PENDENTE\",\n  \"observacao\": \"Consulta criada manualmente\",\n  \"prontuario\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/consultas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "consultas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultas - Atualizar (inclui prontuário)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHora\": \"2025-08-14T12:00:00\",\n  \"pacienteId\": 1,\n  \"dentistaId\": 1,\n  \"status\": \"CONFIRMADA\",\n  \"observacao\": \"Atualizada após atendimento\",\n  \"prontuario\": {\n    \"observacoes\": \"Paciente apresentou sensibilidade\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/consultas/{{consultaId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "consultas",
+                "{{consultaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultas - Alterar Status (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/consultas/{{consultaId}}/status?status=REALIZADA",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "consultas",
+                "{{consultaId}}",
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "REALIZADA"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultas - Cancelar (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/consultas/{{consultaId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "consultas",
+                "{{consultaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultas - Listar por Paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/consultas/paciente/{{pacienteId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "consultas",
+                "paciente",
+                "{{pacienteId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🩺 Prontuário",
+      "item": [
+        {
+          "name": "Prontuários - Criar (opcional: vincular a consulta)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observacoes\": \"Anotações iniciais do prontuário\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/prontuarios?consultaId={{consultaId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "prontuarios"
+              ],
+              "query": [
+                {
+                  "key": "consultaId",
+                  "value": "{{consultaId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prontuários - Buscar por Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/prontuarios/{{prontuarioId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "prontuarios",
+                "{{prontuarioId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prontuários - Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observacoes\": \"Atualização do prontuário após atendimento\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/prontuarios/{{prontuarioId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "prontuarios",
+                "{{prontuarioId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prontuários - Deletar",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/prontuarios/{{prontuarioId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "prontuarios",
+                "{{prontuarioId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📦 Serviços",
+      "item": [
+        {
+          "name": "Serviços - Deletar Serviço",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/servicos/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "servicos",
+                "1"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request DELETE 'http://localhost:8080/api/servicos/1' \\\r\n--header 'Authorization: Bearer <SEU_TOKEN_JWT_AQUI>'"
+          },
+          "response": []
+        },
+        {
+          "name": "Serviços - Criar Serviço",
+          "request": {
+            "auth": {
+              "type": "bearer"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nome\": \"Limpeza Completa (Profilaxia)\",\r\n    \"descricao\": \"Remoção de tártaro e polimento coronário.\",\r\n    \"preco\": 150.00,\r\n    \"ativo\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/servicos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "servicos"
+              ]
+            },
+            "description": "Generated from cURL: curl --location 'http://localhost:8080/api/servicos' \\\r\n--header 'Content-Type: application/json' \\\r\n--header 'Authorization: Bearer <SEU_TOKEN_JWT_AQUI>' \\\r\n--data '{\r\n    \"nome\": \"Limpeza Completa (Profilaxia)\",\r\n    \"descricao\": \"Remoção de tártaro e polimento coronário.\",\r\n    \"preco\": 150.00,\r\n    \"ativo\": true\r\n}'"
+          },
+          "response": []
+        },
+        {
+          "name": "Serviços - Atualizar Serviço",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nome\": \"Limpeza Completa Premium\",\r\n    \"descricao\": \"Remoção de tártaro, polimento e aplicação de flúor.\",\r\n    \"preco\": 210.00,\r\n    \"ativo\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/servicos/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "servicos",
+                "1"
+              ]
+            },
+            "description": "Generated from cURL: curl --location --request PUT 'http://localhost:8080/api/servicos/1' \\\r\n--header 'Content-Type: application/json' \\\r\n--header 'Authorization: Bearer <SEU_TOKEN_JWT_AQUI>' \\\r\n--data '{\r\n    \"nome\": \"Limpeza Completa Premium\",\r\n    \"descricao\": \"Remoção de tártaro, polimento e aplicação de flúor.\",\r\n    \"preco\": 200.00,\r\n    \"ativo\": true\r\n}'"
+          },
+          "response": []
+        },
+        {
+          "name": "Serviços - Listar Todos os Serviços",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/servicos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "servicos"
+              ]
+            },
+            "description": "Generated from cURL: curl --location 'http://localhost:8080/api/servicos' \\\r\n--header 'Authorization: Bearer <SEU_TOKEN_JWT_AQUI>'"
+          },
+          "response": []
+        },
+        {
+          "name": "Serviços - Buscar Serviço por ID",
+          "request": {
+            "auth": {
+              "type": "bearer"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/servicos/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "servicos",
+                "1"
+              ]
+            },
+            "description": "Generated from cURL: curl --location 'http://localhost:8080/api/servicos/1' \\\r\n--header 'Authorization: Bearer <SEU_TOKEN_JWT_AQUI>'"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
